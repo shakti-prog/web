@@ -1,5 +1,11 @@
-import { fetchSrData } from "./service.js";
-import { Card, Swimlane, SwimlaneBody, SignIn } from "./components.js";
+import { fetchSrData, signIn } from "./Functions/service.js";
+import { RouterComponent } from "./Functions/helper.js";
+import {
+  Card,
+  Swimlane,
+  SwimlaneBody,
+  SignIn,
+} from "./Components/components.js";
 
 class Router extends HTMLElement {
   constructor() {
@@ -9,24 +15,8 @@ class Router extends HTMLElement {
     window.addEventListener("hashchange", () => {
       const hash = location.hash.slice(1);
       console.log("Current hash:", hash);
-      switch (hash) {
-        case "login":
-          this.render(`<main-page id="main-page">
-          <sign-in-screen> </sign-in-screen>
-          </main-page>`);
-          break;
-        case "signUp":
-          console.log("Navigate to signUp route");
-          break;
-        case "dashboard":
-          this.render(
-            `<main-page id='main-page'><dashboard-screen id='screen-one'><swim-lanebody></swim-lanebody></dashboard-screen></main-page>`
-          );
-          break;
-        default:
-          console.log("Unknown route");
-          break;
-      }
+      const component = RouterComponent(hash);
+      this.render(component);
     });
   }
 
@@ -79,8 +69,23 @@ class SignInScreen extends HTMLElement {
     super();
   }
   connectedCallback() {
-   
+    this.addEventListener("signIn", this.handleSignIn.bind(this));
     this.render();
+  }
+  async handleSignIn(event) {
+    const signInDetails = event.detail.message;
+    const email = signInDetails.username;
+    const password = signInDetails.password;
+    const response = await signIn({ email, password });
+    if (response.statusCode) {
+      if (response.statusCode == 200) {
+        window.location.hash = "dashboard";
+      } else {
+        window.location.hash = "SomethingWentWrong";
+      }
+    } else {
+      window.location.hash = "NotFound";
+    }
   }
   render() {
     this.innerHTML = `<sign-in-component id="sign-in-component"> </sign-in-component>`;

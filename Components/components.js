@@ -144,6 +144,7 @@ class SignIn extends HTMLElement {
     this.render();
     const usernameInput = this.querySelector("#username");
     const passwordInput = this.querySelector("#password");
+    const button = this.querySelector("#signInButton");
     usernameInput.addEventListener(
       "input",
       this.handleUsernameInput.bind(this)
@@ -152,15 +153,26 @@ class SignIn extends HTMLElement {
       "input",
       this.handlePasswordInput.bind(this)
     );
+    button.addEventListener("click", this.handleClick.bind(this));
   }
   handleUsernameInput(event) {
-    console.log(event.target.value);
     this.details.username = event.target.value;
   }
 
   handlePasswordInput(event) {
-    console.log(event.target.value);
+    event.preventDefault();
     this.details.password = event.target.value;
+  }
+  handleClick(event) {
+    const signInEvent = new CustomEvent("signIn", {
+      bubbles: true,
+      cancelable: true,
+      detail: {
+        message: this.details,
+      },
+    });
+    const element = document.getElementById("sign-in-component");
+    element.dispatchEvent(signInEvent);
   }
 
   render() {
@@ -225,14 +237,14 @@ button:hover {
         <form class="form">
             <h2>Sign In</h2>
             <div class="form-group">
-                <label for="username">Username:</label>
+                <label for="username">Email:</label>
                 <input type="text" id="username" name="username" required/>
             </div>
             <div class="form-group">
                 <label for="password">Password:</label>
                 <input type="password" id="password" name="password" required/>
             </div>
-            <button type="submit">Sign In</button>
+            <button type="button" id="signInButton">Sign In</button>
         </form>
     </div> `;
   }
