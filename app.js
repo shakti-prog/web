@@ -1,4 +1,39 @@
 import { fetchSrData } from "./service.js";
+import { Card, Swimlane, SwimlaneBody, SignIn } from "./components.js";
+
+class Router extends HTMLElement {
+  constructor() {
+    super();
+  }
+  connectedCallback() {
+    window.addEventListener("hashchange", () => {
+      const hash = location.hash.slice(1);
+      console.log("Current hash:", hash);
+      switch (hash) {
+        case "login":
+          this.render(`<main-page id="main-page">
+          <sign-in-screen> </sign-in-screen>
+          </main-page>`);
+          break;
+        case "signUp":
+          console.log("Navigate to signUp route");
+          break;
+        case "dashboard":
+          this.render(
+            `<main-page id='main-page'><dashboard-screen id='screen-one'><swim-lanebody></swim-lanebody></dashboard-screen></main-page>`
+          );
+          break;
+        default:
+          console.log("Unknown route");
+          break;
+      }
+    });
+  }
+
+  render(component) {
+    this.innerHTML = component;
+  }
+}
 
 class MainPage extends HTMLElement {
   constructor() {
@@ -39,185 +74,16 @@ class DashboardScreen extends HTMLElement {
   render() {}
 }
 
-class SwimlaneBody extends HTMLElement {
-  constructor() {
-    super();
-  }
-  connectedCallback() {
-    const element = document.getElementById("screen-one");
-    element.addEventListener(
-      "recievedData",
-      this.handleRecievedData.bind(this)
-    );
-  }
-
-  handleRecievedData(event) {
-    const data = event.detail.message;
-    this.render(data);
-  }
-
-  render(srData) {
-    this.innerHTML = `
-    <style>
-      .lanes{
-         display:flex;
-         gap:40px;
-      }
-    </style>
-      <div class="lanes">   
-         <swim-lane title="To Do" data=${JSON.stringify(
-           srData.toDo
-         )}></swim-lane>
-         <swim-lane title="In Progress" data=${JSON.stringify(
-           srData.inProgress
-         )}></swim-lane>
-         <swim-lane title="Done" data=${JSON.stringify(
-           srData.done
-         )}></swim-lane>
-         <swim-lane title="Rejected" data=${JSON.stringify(
-           srData.rejected
-         )}></swim-lane>
-         <swim-lane title="Accepted" data=${JSON.stringify(
-           srData.accepted
-         )}> </swim-lane>
-      </div>
-  
-    `;
-  }
-}
-
-class Swimlane extends HTMLElement {
-  constructor() {
-    super();
-  }
-
-  connectedCallback() {
-    this.render();
-    this.addEventListener("dragover", this.allowDrop.bind(this));
-    this.addEventListener("drop", this.drop.bind(this));
-  }
-
-  allowDrop(event) {
-    event.preventDefault();
-  }
-
-  drop(event) {
-    event.preventDefault();
-    const id = event.dataTransfer.getData("id");
-    const draggedElement = document.getElementById(id);
-    event.target.appendChild(draggedElement);
-  }
-
-  render() {
-    const data = JSON.parse(this.getAttribute("data"));
-    const title = this.getAttribute("title");
-
-    this.innerHTML = `
-      <style>
-        .swim-lane{
-             width:250px;
-             background-color:#EAEAEA;
-             height: 100vh;
-             border-radius:12px
-        }
-        h4{
-          margin-left: 80px;
-        }
-      </style>
-      <div class="swim-lane">
-        <h4>${title}</h4>
-        ${
-          Array.isArray(data) && data.length > 0
-            ? data.map(
-                (issue) =>
-                  `<swim-card  id=${issue.no} status=${issue.no} description=${issue.description}></swim-card>`
-              )
-            : ""
-        }
-      </div>
-    `;
-  }
-}
-
-class Card extends HTMLElement {
-  constructor() {
-    super();
-    this.draggable = true;
-    this.setAttributes();
-  }
-
-  setAttributes() {
-    const template = document.getElementById("card-template");
-    const content = template.content;
-    this.appendChild(content.cloneNode(true));
-    const h2 = this.querySelector("h2");
-    const para = this.querySelector("p");
-    const card = this.querySelector("div");
-    if (card) {
-      card.id = this.getAttribute("id");
-    }
-    if (h2) {
-      h2.textContent = this.getAttribute("status");
-    }
-    if (para) {
-      para.textContent = this.getAttribute("description");
-    }
-  }
-
-  connectedCallback() {
-    this.addEventListener("dragstart", this.handleDragStart.bind(this));
-  }
-
-  handleDragStart(event) {
-    event.dataTransfer.setData("id", event.target.id);
-  }
-}
-
 class SignInScreen extends HTMLElement {
   constructor() {
     super();
   }
-  connectedCallback() {}
-  render() {}
-}
-
-class SignUpScreen extends HTMLElement {
-  constructor() {
-    super();
-  }
-  connectedCallback() {}
-  render() {}
-}
-
-class Router extends HTMLElement {
-  constructor() {
-    super();
-  }
   connectedCallback() {
-    window.addEventListener("hashchange", () => {
-      const hash = location.hash.slice(1);
-      console.log("Current hash:", hash);
-      switch (hash) {
-        case "login":
-          console.log("Navigated to sign In route");
-          break;
-        case "signUp":
-          console.log("Navigate to signUp route");
-          break;
-        case "dashboard":
-          this.render(
-            "<main-page id='main-page'><dashboard-screen id='screen-one'><swim-lanebody></swim-lanebody></dashboard-screen></main-page>"
-          );
-          break;
-        default:
-          console.log("Unknown route");
-          break;
-      }
-    });
+   
+    this.render();
   }
-
-  render(component) {
-    this.innerHTML = component;
+  render() {
+    this.innerHTML = `<sign-in-component id="sign-in-component"> </sign-in-component>`;
   }
 }
 
@@ -227,3 +93,5 @@ customElements.define("swim-lane", Swimlane);
 customElements.define("swim-lanebody", SwimlaneBody);
 customElements.define("swim-card", Card);
 customElements.define("custom-router", Router);
+customElements.define("sign-in-screen", SignInScreen);
+customElements.define("sign-in-component", SignIn);
