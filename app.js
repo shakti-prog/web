@@ -21,7 +21,7 @@ class MainPage extends HTMLElement {
   }
 }
 
-class ScreenOne extends HTMLElement {
+class DashboardScreen extends HTMLElement {
   constructor() {
     super();
   }
@@ -139,7 +139,7 @@ class Swimlane extends HTMLElement {
   }
 }
 
-class Card extends HTMLElement{
+class Card extends HTMLElement {
   constructor() {
     super();
     this.draggable = true;
@@ -173,21 +173,57 @@ class Card extends HTMLElement{
   }
 }
 
+class SignInScreen extends HTMLElement {
+  constructor() {
+    super();
+  }
+  connectedCallback() {}
+  render() {}
+}
+
+class SignUpScreen extends HTMLElement {
+  constructor() {
+    super();
+  }
+  connectedCallback() {}
+  render() {}
+}
+
 class Router extends HTMLElement {
   constructor() {
     super();
   }
   connectedCallback() {
-    console.log("Router is rendered");
+    window.addEventListener("hashchange", () => {
+      const hash = location.hash.slice(1);
+      console.log("Current hash:", hash);
+      switch (hash) {
+        case "login":
+          console.log("Navigated to sign In route");
+          break;
+        case "signUp":
+          console.log("Navigate to signUp route");
+          break;
+        case "dashboard":
+          this.render(
+            "<main-page id='main-page'><dashboard-screen id='screen-one'><swim-lanebody></swim-lanebody></dashboard-screen></main-page>"
+          );
+          break;
+        default:
+          console.log("Unknown route");
+          break;
+      }
+    });
   }
-  navigate(url) {
-    window.history.pushState(url);
+
+  render(component) {
+    this.innerHTML = component;
   }
 }
 
 customElements.define("main-page", MainPage);
-customElements.define("screen-one", ScreenOne);
+customElements.define("dashboard-screen", DashboardScreen);
 customElements.define("swim-lane", Swimlane);
 customElements.define("swim-lanebody", SwimlaneBody);
 customElements.define("swim-card", Card);
-customElements.define("wc-router", Router);
+customElements.define("custom-router", Router);
