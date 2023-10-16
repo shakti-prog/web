@@ -1,11 +1,12 @@
+import { url } from "../constants/urlConstants.js"
+
 export async function fetchSrData() {
-  const response = await fetch("http://127.0.0.1:9000/getSrData");
+  const response = await fetch(`${url}/getSrData`);
   const { accepted, rejected, toDo, inProgress, done } = await response.json();
   return { accepted, rejected, toDo, inProgress, done };
 }
 
 export async function signIn(details) {
-  const url = "http://127.0.0.1:9000/login";
   const options = {
     method: "POST",
     headers: {
@@ -14,7 +15,7 @@ export async function signIn(details) {
     body: JSON.stringify(details),
   };
   try {
-    const response = await fetch(url, options);
+    const response = await fetch(`${url}/login`, options);
     const responseData = await response.json();
     return {
       statusCode: response.status,
@@ -28,4 +29,13 @@ export async function signIn(details) {
   }
 }
 
-export async function signUp() {}
+export async function signUp() {
+
+}
+
+
+export async function createSr(srData){
+  
+
+
+}

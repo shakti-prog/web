@@ -1,10 +1,11 @@
 import { fetchSrData, signIn } from "./Functions/service.js";
-import { RouterComponent } from "./Functions/helper.js";
+import { RouterComponent, handleResponse } from "./Functions/helper.js";
 import {
   Card,
   Swimlane,
   SwimlaneBody,
   SignIn,
+  srForm,
 } from "./Components/components.js";
 
 class Router extends HTMLElement {
@@ -60,7 +61,24 @@ class DashboardScreen extends HTMLElement {
     });
     const element = document.getElementById("main-page");
     element.dispatchEvent(fetchDataEvent);
+    this.addEventListener("OpenSrForm", this.handleOpenSrForm.bind(this));
+
   }
+
+  handleOpenSrForm(event) {
+    const openSrForm = new CustomEvent("SrFormOpened", {
+      bubbles: true,
+      cancelable: true,
+      detail: {
+        message: "Open",
+      },
+    });
+    const element = document.getElementById("sr-form");
+    element.dispatchEvent(openSrForm);
+  }
+
+ 
+
   render() {}
 }
 
@@ -74,18 +92,11 @@ class SignInScreen extends HTMLElement {
   }
   async handleSignIn(event) {
     const signInDetails = event.detail.message;
-    const email = signInDetails.username;
-    const password = signInDetails.password;
-    const response = await signIn({ email, password });
-    if (response.statusCode) {
-      if (response.statusCode == 200) {
-        window.location.hash = "dashboard";
-      } else {
-        window.location.hash = "SomethingWentWrong";
-      }
-    } else {
-      window.location.hash = "NotFound";
-    }
+    const response = await signIn({
+      email: signInDetails.username,
+      password: signInDetails.password,
+    });
+    handleResponse(response);
   }
   render() {
     this.innerHTML = `<sign-in-component id="sign-in-component"> </sign-in-component>`;
@@ -100,3 +111,4 @@ customElements.define("swim-card", Card);
 customElements.define("custom-router", Router);
 customElements.define("sign-in-screen", SignInScreen);
 customElements.define("sign-in-component", SignIn);
+customElements.define("sr-form", srForm);
