@@ -27,7 +27,7 @@ export function RouterComponent(hash) {
     case "InvalidCredentials":
       return `<div> Wrong email or password </div>`;
     case "ServiceUnavailable":
-      return `<div> Service not availbale currently please try again later `
+      return `<div> Service not availbale currently please try again later `;
     default:
       return `<div> Error 404 Page not found </div>`;
   }
@@ -65,4 +65,11 @@ function checkLogInStatus() {
     return false;
   }
   return true;
+}
+
+export function dipatchEventForId(id, event) {
+  const element = document.getElementById(id);
+  if (element) {
+    element.dispatchEvent(event);
+  }
 }
