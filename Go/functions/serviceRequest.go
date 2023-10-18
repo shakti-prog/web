@@ -1,18 +1,21 @@
 package functions
 
 import (
+	"strconv"
+	"strings"
+
 	"github.com/gocql/gocql"
 	"github.com/gofiber/fiber/v2"
-	"strconv"
 )
+
 
 func GetSrData(c *fiber.Ctx, session *gocql.Session) error {
 	query := "Select no,description,Type,status,reporter,assignee from serviceRequest"
-	var toDoData []serviceRequest
-	var inProgressData []serviceRequest
-	var doneData []serviceRequest
-	var rejecedData []serviceRequest
-	var acceptedData []serviceRequest
+	var toDoData []retrieveSRData
+	var inProgressData []retrieveSRData
+	var doneData []retrieveSRData
+	var rejecedData []retrieveSRData
+	var acceptedData []retrieveSRData
 	scanner := session.Query(query).Iter().Scanner()
 	for scanner.Next() {
 		var no int64
@@ -25,7 +28,7 @@ func GetSrData(c *fiber.Ctx, session *gocql.Session) error {
 		if err != nil {
 			return c.SendStatus(fiber.StatusInternalServerError)
 		}
-		data1 := serviceRequest{No: no, Description: description, Type: Type, Status: status, Reporter: reporter, Assignee: assignee}
+		data1 := retrieveSRData{No: no, Description: strings.Split(description," "), Type: Type, Status: status, Reporter: reporter, Assignee: assignee}
 		if data1.Status == "ToDo" {
 			toDoData = append(toDoData, data1)
 		} else if data1.Status == "InProgress" {

@@ -78,3 +78,15 @@ export function dipatchEventForId(id, event) {
     element.dispatchEvent(event);
   }
 }
+
+
+export function colorForCard(type) {
+  if (type === "Story") {
+     return "border-green-700";
+  }
+  else if (type === "Bug") {
+    return "border-red-700";
+  }
+  return "border-blue-700";
+
+}

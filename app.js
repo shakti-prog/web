@@ -24,16 +24,13 @@ class Router extends HTMLElement {
   connectedCallback() {
     window.addEventListener("load", () => {
       const hash = location.hash.slice(1);
-      const component = localStorage.getItem(hash);
-      if (component) {
-        this.render(component);
-      }
+      const component = RouterComponent(hash);
+      this.render(component);
     });
 
     window.addEventListener("hashchange", () => {
       const hash = location.hash.slice(1);
       const component = RouterComponent(hash);
-      localStorage.setItem(hash, component);
       this.render(component);
     });
   }
@@ -79,15 +76,13 @@ class DashboardScreen extends HTMLElement {
     this.addEventListener("OpenSrForm", this.handleOpenSrForm.bind(this));
     this.addEventListener("createNewSr", this.handleNewSrCreation.bind(this));
     this.addEventListener("cardDragged", this.handleCardDragged.bind(this));
+  
   }
 
   handleOpenSrForm(event) {
     const openSrForm = new CustomEvent("SrFormOpened", {
       bubbles: true,
       cancelable: true,
-      detail: {
-        message: "Open",
-      },
     });
     dipatchEventForId("sr-form", openSrForm);
   }
@@ -115,7 +110,6 @@ class SignInScreen extends HTMLElement {
   }
   async handleSignIn(event) {
     const signInDetails = event.detail.message;
-    console.log(signInDetails);
     const response = await signIn({
       email: signInDetails.username,
       password: signInDetails.password,
