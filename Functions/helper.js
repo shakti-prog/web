@@ -54,8 +54,13 @@ function storeLoginDetails(response) {
   const responseData = response.responseData;
   const name = responseData.name;
   const token = responseData.token;
+  const expirationTimeInMinutes = 24 * 60;
   localStorage.setItem("name", name);
   localStorage.setItem("token", token);
+  setTimeout(() => {
+    localStorage.removeItem("token");
+    localStorage.removeItem("name");
+  }, expirationTimeInMinutes * 60 * 1000);
 }
 
 function checkLogInStatus() {

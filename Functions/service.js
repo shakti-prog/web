@@ -70,33 +70,31 @@ export async function createSr(srData) {
   }
 }
 
-
 export async function updateSr(srData) {
   const options = {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
     },
-    body:{},
+    body: {},
   };
   try {
-    const response = await fetch(`${url}/updateSrStatus/${srData.no}/${srData.status}`, options);
+    const response = await fetch(
+      `${url}/updateSrStatus/${srData.no}/${srData.status}`,
+      options
+    );
     if (response.status == 200) {
-        const fetchDataEvent = new CustomEvent("fetchData", {
-          bubbles: true,
-          cancelable: true,
-          detail: {
-            message: "getSrData",
-          },
-        });
-       dipatchEventForId("main-page", fetchDataEvent);
+      const fetchDataEvent = new CustomEvent("fetchData", {
+        bubbles: true,
+        cancelable: true,
+        detail: {
+          message: "getSrData",
+        },
+      });
+      dipatchEventForId("main-page", fetchDataEvent);
     }
+  } catch (error) {
+    console.log(error);
+    window.location.hash = "ServiceUnavailable";
   }
-  catch (error) {
-    
-
-  }
-   
-
-
- }
+}
