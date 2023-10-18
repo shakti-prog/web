@@ -1,10 +1,9 @@
 package functions
 
-
 import (
-	"strconv"
 	"github.com/gocql/gocql"
 	"github.com/gofiber/fiber/v2"
+	"strconv"
 )
 
 func GetSrData(c *fiber.Ctx, session *gocql.Session) error {
@@ -78,16 +77,15 @@ func CreateNewSr(c *fiber.Ctx, session *gocql.Session) error {
 
 }
 
-func UpdateSr(c *fiber.Ctx, session *gocql.Session) error{
-     no,err := strconv.ParseInt(c.Params("no"),10,64); 
-	 if err != nil{
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"Err": "Invalid SR number"});
-	 } 
-	 status := c.Params("status");
-	 query := session.Query("Update servicerequest set status = ? where no = ?",status,no);
-	 if err := query.Exec(); err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"Err": "Could not update SR"});
+func UpdateSr(c *fiber.Ctx, session *gocql.Session) error {
+	no, err := strconv.ParseInt(c.Params("no"), 10, 64)
+	if err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"Err": "Invalid SR number"})
 	}
-	return c.Status(fiber.StatusOK).JSON(fiber.Map{"Message":"SR Successfully Updated"})
+	status := c.Params("status")
+	query := session.Query("Update servicerequest set status = ? where no = ?", status, no)
+	if err := query.Exec(); err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"Err": "Could not update SR"})
+	}
+	return c.Status(fiber.StatusOK).JSON(fiber.Map{"Message": "SR Successfully Updated"})
 }
-

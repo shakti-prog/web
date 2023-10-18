@@ -1,6 +1,5 @@
 package functions
 
-
 import (
 	"github.com/gocql/gocql"
 	"github.com/gofiber/fiber/v2"

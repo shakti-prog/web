@@ -18,8 +18,6 @@ func main() {
 		AllowHeaders: "Origin, Content-Type, Accept",
 	}))
 
-
-
 	app.Post("/login", func(c *fiber.Ctx) error {
 		return functions.Login(c, session)
 	})
@@ -37,10 +35,9 @@ func main() {
 	})
 
 	app.Post("/updateSrStatus/:no/:status", func(c *fiber.Ctx) error {
-	   return functions.UpdateSr(c,session)
- 
-	})
+		return functions.UpdateSr(c, session)
 
+	})
 
 	err := app.Listen(":9000")
 	if err != nil {
