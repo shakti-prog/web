@@ -89,7 +89,7 @@ class Swimlane extends HTMLElement {
       detail: {
         message: {
           no: id,
-          status: this.getAttribute("title").replace(/\s+/g, ""),
+          status: this.getAttribute("title"),
         },
       },
     });
@@ -183,10 +183,10 @@ class SwimlaneBody extends HTMLElement {
                     </div>
                 </div>
        <div style="width: 1180px; justify-content: flex-start; align-items: flex-start; gap: 36px; display: inline-flex">
-         <swim-lane class="flex-1" title="To Do" data=${JSON.stringify(
+         <swim-lane class="flex-1" title="ToDo" data=${JSON.stringify(
            srData.toDo
          )}></swim-lane>
-       <swim-lane class="flex-1" title="In Progress" data=${JSON.stringify(
+       <swim-lane class="flex-1" title="InProgress" data=${JSON.stringify(
          srData.inProgress
        )}></swim-lane>
        <swim-lane class="flex-1" title="Done" data=${JSON.stringify(
