@@ -1,4 +1,8 @@
-import { dipatchEventForId, colorForCard } from "../Functions/helper.js";
+import {
+  dipatchEventForId,
+  colorForCard,
+  attributesForCard,
+} from "../Functions/helper.js";
 
 class Card extends HTMLElement {
   constructor() {
@@ -20,31 +24,38 @@ class Card extends HTMLElement {
     const reporter = this.getAttribute("reporter");
     const type = this.getAttribute("type");
     const description = JSON.parse(this.getAttribute("description"));
-    console.log(description);
-    const color = colorForCard(type);
+    const cardAttributes = attributesForCard(type);
     this.innerHTML = `
-   <div class="w-56 h-auto ml-2 mt-4 h-auto p-2.5 bg-white rounded-md border ${color} flex-col justify-start items-start gap-3 inline-flex">
+   <div class="w-56 h-auto ml-2 mt-4 h-auto p-2.5 bg-white rounded-md border ${
+     cardAttributes.borderColor
+   } flex-col justify-start items-start gap-3 inline-flex">
   <div class="self-stretch justify-between items-center inline-flex">
-    <div class="text-zinc-500 text-xs font-normal font-sans">SRCO-${id}</div>
-    <div class="justify-start items-center gap-1.5 flex">
-      <div class="w-4 h-4 relative">
-        <div class="w-4 h-4 left-0 top-0 absolute bg-blue-500 rounded-sm">
+    <div class="text-zinc-500 opacity-60 text-xs font-normal font-sans">SRCO-${id}</div>
+     <div class="flex items-center justify-start gap-1.5">
+      <div class="relative h-4 w-4">
+        <div class="absolute left-0 top-0 h-4 w-4 rounded-sm ${
+          cardAttributes.color
+        }">
+         ${cardAttributes.svg}
         </div>
       </div>
-      <div class="w-4 h-4 relative">
-        <div class="w-4 h-4 left-0 top-0 absolute">
-          <div class="w-3 h-2.5 left-[1.78px] top-[3.11px] absolute">
+      <div class="relative h-4 w-4">
+        <div class="absolute left-0 top-0 h-4 w-4">
+          <div class="absolute left-[1.78px] top-[3.11px] h-2.5 w-3">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="h-4 w-4 text-red-600">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l7.5-7.5 7.5 7.5m-15 6l7.5-7.5 7.5 7.5" />
+            </svg>
           </div>
         </div>
       </div>
-      <div class="p-1 bg-gray-200 rounded-lg flex-col justify-start items-center gap-2 inline-flex">
-        <div class="w-2 h-2 text-center text-black text-xs font-normal font-serif mb-2">4</div>
+      <div class="inline-flex flex-col items-center justify-start gap-2 rounded-lg bg-gray-200 p-1">
+        <div class="mb-2 h-2 w-2 text-center font-serif text-xs font-normal text-black">4</div>
       </div>
     </div>
   </div>
-  <div class="w-40 h-auto max-h-32 text-black text-sm font-normal font-sans leading-none overflow-hidden"> ${description.join(
-    " "
-  )} </div>
+  <div class="w-48 h-auto max-h-24 text-black text-sm font-normal font-sans leading-none overflow-hidden">
+    <p class="leading-5"> ${description.join(" ")} </p>
+  </div>
   <div class="self-stretch justify-start items-start gap-1.5 grid grid-cols-3">
     <div class="px-1.5 py-1 bg-red-100 rounded justify-center items-center gap-1.5 flex">
       <div class="text-center text-red-700 text-xs font-normal font-sans">Admin Console</div>
@@ -58,12 +69,11 @@ class Card extends HTMLElement {
     
   </div>
   <div class="self-stretch justify-between items-start inline-flex">
-    <div class="text-zinc-500 text-xs font-normal ">${reporter}</div>
+    <div class="text-zinc-500 text-xs font-normal opacity-60 ">${reporter}</div>
     <div class="text-zinc-500 text-xs font-normal ">6 days ago</div>
   </div>
 </div>
-
-   
+  
 `;
   }
 }
@@ -100,34 +110,35 @@ class Swimlane extends HTMLElement {
   }
 
   render() {
-    console.log(this.getAttribute("data"));
     let data = JSON.parse(this.getAttribute("data"));
     if (!data) {
       data = [];
     }
     const title = this.getAttribute("title");
     this.innerHTML = `  
-  <div class="w-64 h-screen px-1.5 pt-2.5 pb-1 bg-gray-100 rounded-lg flex-col justify-start items-start gap-2 inline-flex">
+  <div class="w-64 h-screen overflow-y-scroll px-1.5 pt-2.5 pb-1 bg-gray-100 rounded-lg flex-col justify-start items-start gap-2 inline-flex">
   <div class="self-stretch px-1.5 justify-between items-center inline-flex">
     <div class="justify-start items-center gap-1.5 flex">
       <div class="w-3 h-3 rounded-full border border-slate-900"></div>
       <div class="justify-start items-start gap-1 flex">
-        <div class="text-slate-900 text-xs font-normal font-['Gilroy-SemiBold']">${title}</div>
-        <div class="text-zinc-500 text-xs font-normal font-['Gilroy-SemiBold']">${
+        <div class="text-slate-900 text-md font-normal font-sans">${title}</div>
+        <div class="text-zinc-500 text-md font-normal font-sans">(${
           data.length
-        }</div>
+        })</div>
       </div>
     </div>
   </div>
   <div class="flex-col justify-start items-start gap-2 flex h-screen">
-   ${data.map(
-     (issue) =>
-       `<swim-card  id=${issue.no} status=${issue.status} reporter=${
-         issue.reporter
-       } assignee=${issue.assignee} type=${
-         issue.type
-       } description=${JSON.stringify(issue.description)}></swim-card>`
-   )}
+   ${data
+     .map(
+       (issue) =>
+         `<swim-card  id=${issue.no} status=${issue.status} reporter=${
+           issue.reporter
+         } assignee=${issue.assignee} type=${
+           issue.type
+         } description=${JSON.stringify(issue.description)}></swim-card>`
+     )
+     .join("")}
   </div>
 </div>
     `;
@@ -168,32 +179,9 @@ class SwimlaneBody extends HTMLElement {
 
   render(srData) {
     this.innerHTML = `
-    <div>
+    <div class="ml-32">
      <div class="text-slate-900 text-2xl font-normal mt-4 mb-4 font-bold">Service Request</div>
-     <div class="self-stretch justify-start items-center gap-3 inline-flex mb-4">
-                    <div class="px-3.5 py-2 bg-blue-500 rounded justify-start items-center gap-2 flex">
-                        <div class="text-center text-white text-[10px] font-normal ">Sort By</div>
-                        <div class="w-2.5 h-2.5 relative"></div>
-                    </div>
-                    <div class="px-3.5 py-2 bg-blue-500 rounded justify-start items-center gap-2 flex">
-                        <div class="text-center text-white text-[10px] font-normal ">Reporter</div>
-                        <div class="w-2.5 h-2.5 relative"></div>
-                    </div>
-                    <div class="px-3.5 py-2 bg-blue-500 rounded justify-start items-center gap-2 flex">
-                        <div class="text-center text-white text-[10px] font-normal ">Assignee</div>
-                        <div class="w-2.5 h-2.5 relative"></div>
-                    </div>
-                    <div class="px-3.5 py-2 bg-blue-500 rounded justify-start items-center gap-2 flex">
-                        <div class="text-center text-white text-[10px] font-normal">Quick Filters</div>
-                        <div class="w-2.5 h-2.5 relative"></div>
-                    </div>
-                    <div>
-                      <button type="button" id="createSrButton" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded mr-4">
-                         <span class="text-center text-white text-[10px] font-normal">Create Issue</span>
-                      </button>
-                    </div>
-                </div>
-       <div style="width: 1180px; justify-content: flex-start; align-items: flex-start; gap: 36px; display: inline-flex">
+       <div style="width: 1180px; justify-content: flex-start; align-items: flex-start; gap: 12px; display: inline-flex">
          <swim-lane class="flex-1" title="ToDo" data=${JSON.stringify(
            srData.toDo
          )}></swim-lane>
