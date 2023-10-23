@@ -21,7 +21,7 @@ export function RouterComponent(hash) {
                  <dashboard-screen id="dashboard-screen">
                      <swim-lanebody id="swim-lane-body">
                      </swim-lanebody>
-                      <sr-dialog id="srDialog"></sr-dialog>
+                      <sr-dialog id="sr-dialog"></sr-dialog>
                       <sr-form id="sr-form">   
                       </sr-form>
                 </dashboard-screen>
@@ -87,15 +87,6 @@ export function dipatchEventForId(id, event) {
   }
 }
 
-export function colorForCard(type) {
-  if (type === "Story") {
-    return "border-green-500";
-  } else if (type === "Bug") {
-    return "border-red-500";
-  }
-  return "border-blue-500";
-}
-
 export function attributesForCard(type) {
   switch (type) {
     case "Story": {
@@ -113,7 +104,8 @@ export function attributesForCard(type) {
         borderColor: "border-blue-500",
         svg: `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4 text-white">
        <path stroke-linecap="round" stroke-linejoin="round" d="M17.593 3.322c1.1.128 1.907 1.077 1.907 2.185V21L12 17.25 4.5 21V5.507c0-1.108.806-2.057 1.907-2.185a48.507 48.507 0 0111.186 0z" />
-         </svg>
+         </svg>,
+
     `,
       };
     }
@@ -126,5 +118,74 @@ export function attributesForCard(type) {
 </svg>
 `,
       };
+  }
+}
+
+export function svgForPriority(type) {
+  switch (type) {
+    case "Highest": {
+      return `<svg
+          xmlns="http://www.w3.org/2000/svg"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke-width="1.5"
+          stroke="currentColor"
+          class="h-4 w-4 text-red-600"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            d="M4.5 12.75l7.5-7.5 7.5 7.5m-15 6l7.5-7.5 7.5 7.5"
+          />
+        </svg>`;
+    }
+    case "High": {
+      return `<svg
+          xmlns="http://www.w3.org/2000/svg"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke-width="1.5"
+          stroke="currentColor"
+          class="w-4 h-4 text-red-600"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            d="M4.5 10.5L12 3m0 0l7.5 7.5M12 3v18"
+          />
+        </svg>`;
+    }
+    case "Medium": {
+      return `<svg
+          xmlns="http://www.w3.org/2000/svg"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke-width="1.5"
+          stroke="currentColor"
+          class="w-4 h-4 text-yellow-600"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            d="M3.75 9h16.5m-16.5 6.75h16.5"
+          />
+        </svg>`;
+    }
+    default: {
+      return `<svg
+          xmlns="http://www.w3.org/2000/svg"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke-width="1.5"
+          stroke="currentColor"
+          class="w-4 h-4 text-blue-600"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            d="M12 4.5v15m0 0l6.75-6.75M12 19.5l-6.75-6.75"
+          />
+        </svg>`;
+    }
   }
 }

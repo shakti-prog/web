@@ -110,7 +110,7 @@ func GetSrDataForStatus(c *fiber.Ctx, session *gocql.Session) error {
 		var priority string
 		var title string
 		var createdAt time.Time
-		err := scanner.Scan(&no, &description, &Type, &status, &reporter, &assignee,&priority,&title,&createdAt)
+		err := scanner.Scan(&no, &description, &Type, &status, &reporter, &assignee,&title,&priority,&createdAt)
 		if err != nil {
 			return c.SendStatus(fiber.StatusInternalServerError)
 		}

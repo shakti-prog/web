@@ -1,4 +1,4 @@
-import { dipatchEventForId, attributesForCard } from "../Functions/helper.js";
+import { dipatchEventForId, attributesForCard, svgForPriority } from "../Functions/helper.js";
 import { customEvents, idConstants } from "../constants/ID_EVENT_Constants.js";
 
 class Card extends HTMLElement {
@@ -26,7 +26,7 @@ class Card extends HTMLElement {
   handleDoubleClick(event) {
     const id = this.getAttribute("id");
     dipatchEventForId(
-      "dashboard-screen",
+      idConstants.DASHBOARD_SCREEN,
       new CustomEvent("openSrModal", {
         bubbles: true,
         cancelable: true,
@@ -43,6 +43,7 @@ class Card extends HTMLElement {
     const type = this.getAttribute("type");
     const description = JSON.parse(this.getAttribute("description"));
     const cardAttributes = attributesForCard(type);
+    const priority = this.getAttribute("priority");
     this.innerHTML = `
    <div class="w-56 max-h-56 ml-2 mt-4 h-auto p-2.5 bg-white rounded-md border overflow-y-scroll ${
      cardAttributes.borderColor
@@ -60,9 +61,7 @@ class Card extends HTMLElement {
       <div class="relative h-4 w-4">
         <div class="absolute left-0 top-0 h-4 w-4">
           <div class="absolute left-[1.78px] top-[3.11px] h-2.5 w-3">
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="h-4 w-4 text-red-600">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l7.5-7.5 7.5 7.5m-15 6l7.5-7.5 7.5 7.5" />
-            </svg>
+            ${svgForPriority(priority)}
           </div>
         </div>
       </div>
@@ -101,7 +100,10 @@ class Swimlane extends HTMLElement {
   }
 
   connectedCallback() {
-    this.addEventListener(customEvents.RENDER_SR_DATA, this.handleSrData.bind(this));
+    this.addEventListener(
+      customEvents.RENDER_SR_DATA,
+      this.handleSrData.bind(this)
+    );
     this.addEventListener("dragover", this.allowDrop.bind(this));
     this.addEventListener("drop", this.drop.bind(this));
     dipatchEventForId(
@@ -168,7 +170,7 @@ class Swimlane extends HTMLElement {
            issue.reporter
          } assignee=${issue.assignee} type=${
            issue.type
-         } description=${JSON.stringify(issue.description)}></swim-card>`
+         } description=${JSON.stringify(issue.description)} priority=${issue.priority}></swim-card>`
      )
      .join("")}
   </div>
@@ -183,7 +185,9 @@ class SwimlaneBody extends HTMLElement {
   }
   connectedCallback() {
     this.render();
-    document.querySelector("#createSrButton").addEventListener("click", this.handleCreateSr.bind(this));
+    document
+      .querySelector("#createSrButton")
+      .addEventListener("click", this.handleCreateSr.bind(this));
   }
 
   handleCreateSr(event) {
@@ -352,6 +356,7 @@ class srForm extends HTMLElement {
   }
 
   handleCloseSrForm(event) {
+    console.log("Here");
     document.querySelector("#sr-form-dialog").close();
   }
 
@@ -457,12 +462,12 @@ class srDialog extends HTMLElement {
     super();
   }
   connectedCallback() {
-    this.addEventListener(idConstants.SR_DETAILS_DIALOG, this.handleDialogBox.bind(this));
+    this.addEventListener("openSrDialog", this.handleDialogBox.bind(this));
   }
 
   handleDialogBox(event) {
     this.render(event.detail.message);
-    document.querySelector("sr-details-dialog").showModal();
+    this.querySelector("#sr-details-dialog").showModal();
   }
 
   render(data) {

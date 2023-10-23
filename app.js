@@ -104,19 +104,12 @@ class DashboardScreen extends HTMLElement {
     dipatchEventForId(idConstants.DASHBOARD_SCREEN, event2);
   }
 
-  handleOpenSrForm(event) {
-    dipatchEventForId("sr-form",  new CustomEvent("SrFormOpened", {
-      bubbles: true,
-      cancelable: true,
-    }));
-  }
-
   async handleNewSrCreation(event) {
     const data = event.detail.message;
     const response = await createSr(data);
     if (response.status == 200) {
       dipatchEventForId(
-        "sr-dialog",
+        "sr-form",
         new CustomEvent("close-sr-form", {
           bubbles: true,
           cancelable: true,
@@ -139,7 +132,7 @@ class DashboardScreen extends HTMLElement {
     const id = event.detail.message;
     const data = await getSpecificSr(id);
     dipatchEventForId(
-      "srDialog",
+      "sr-dialog",
       new CustomEvent("openSrDialog", {
         bubbles: true,
         cancelable: true,
