@@ -40,6 +40,8 @@ export async function createSr(srData) {
     status: "ToDo",
     assignee: srData.assignee,
     reporter: srData.reporter,
+    title: srData.title,
+    priority: srData.priority
   };
   const options = {
     method: "POST",
@@ -50,23 +52,12 @@ export async function createSr(srData) {
   };
   try {
     const response = await fetch(`${url}/createSr`, options);
-    if (response.status == 200) {
-      const closeSrFormEvent = new CustomEvent("CloseSrForm", {
-        bubbles: true,
-        cancelable: true,
-      });
-      const fetchDataEvent = new CustomEvent("fetchData", {
-        bubbles: true,
-        cancelable: true,
-        detail: {
-          message: "getSrData",
-        },
-      });
-      dipatchEventForId("sr-form", closeSrFormEvent);
-      dipatchEventForId("main-page", fetchDataEvent);
-    }
+    return response
+    
   } catch (error) {
-    console.log(error);
+    return {
+      "Error":error
+    }
   }
 }
 
@@ -96,5 +87,29 @@ export async function updateSr(srData) {
   } catch (error) {
     console.log(error);
     window.location.hash = "ServiceUnavailable";
+  }
+}
+
+export async function fetchSrDataForSwimlane(type) {
+  try {
+    const response = await fetch(`${url}/getSrData/${type}`);
+    const { data } = await response.json();
+    return data;
+  } catch (error) {
+    return {
+      Error: error,
+    };
+  }
+}
+
+export async function getSpecificSr(id) {
+  try {
+    const response = await fetch(`${url}/getSpecificSrData/${id}`);
+    const data = await response.json();
+    return data;
+  } catch (error) {
+    return {
+      Error: error,
+    };
   }
 }

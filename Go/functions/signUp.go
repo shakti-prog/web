@@ -10,6 +10,7 @@ func SignUp(c *fiber.Ctx, session *gocql.Session) error {
 	if err := c.BodyParser(p); err != nil {
 		return c.SendStatus(fiber.StatusBadRequest)
 	}
+   
 	emailLength := len(p.Email)
 	passwordLength := len(p.Password)
 

@@ -1,13 +1,15 @@
 import {
   createSr,
-  fetchSrData,
   signIn,
+  fetchSrDataForSwimlane,
   updateSr,
+  getSpecificSr
 } from "./Functions/service.js";
 import {
   RouterComponent,
   handleResponse,
   dipatchEventForId,
+
 } from "./Functions/helper.js";
 import {
   Card,
@@ -15,7 +17,9 @@ import {
   SwimlaneBody,
   SignIn,
   srForm,
+  srDialog,
 } from "./Components/components.js";
+import { customEvents, idConstants } from "./constants/ID_EVENT_Constants.js";
 
 class Router extends HTMLElement {
   constructor() {
@@ -45,18 +49,7 @@ class MainPage extends HTMLElement {
     super();
   }
   connectedCallback() {
-    this.addEventListener("fetchData", this.handleFetch.bind(this));
-  }
-  async handleFetch(event) {
-    const data = await fetchSrData();
-    const recievedDataEvent = new CustomEvent("recievedData", {
-      bubbles: true,
-      cancelable: true,
-      detail: {
-        message: data,
-      },
-    });
-    dipatchEventForId("screen-one", recievedDataEvent);
+
   }
 }
 
@@ -65,38 +58,97 @@ class DashboardScreen extends HTMLElement {
     super();
   }
   connectedCallback() {
-    const fetchDataEvent = new CustomEvent("fetchData", {
+    this.addEventListener(
+      "getSrDataForSwimlane",
+      this.handleGetSrData.bind(this)
+    );
+    this.addEventListener("createNewSr", this.handleNewSrCreation.bind(this));
+    this.addEventListener("draggedEvent", this.handleDragEvent.bind(this));
+    this.addEventListener("openSrModal", this.handleOpenSrModal.bind(this));
+  }
+
+  async handleGetSrData(event) {
+    const type = event.detail.message;
+    const data = await fetchSrDataForSwimlane(type);
+    dipatchEventForId(
+      type,
+      new CustomEvent(customEvents.RENDER_SR_DATA, {
+        bubbles: true,
+        cancelable: true,
+        detail: {
+          message: data,
+        },
+      })
+    );
+  }
+
+  async handleDragEvent(event) {
+    const id = event.detail.message.no;
+    const previous = event.detail.message.previousStatus;
+    const status = event.detail.message.status;
+    console.log(previous);
+    console.log(status);
+
+    await updateSr({ no: id, status });
+    const event1 = new CustomEvent(customEvents.GET_DATA_FOR_SWIMLANE, {
       bubbles: true,
       cancelable: true,
-      detail: {
-        message: "getSrData",
-      },
+      detail: { message: status },
     });
-    dipatchEventForId("main-page", fetchDataEvent);
-    this.addEventListener("OpenSrForm", this.handleOpenSrForm.bind(this));
-    this.addEventListener("createNewSr", this.handleNewSrCreation.bind(this));
-    this.addEventListener("cardDragged", this.handleCardDragged.bind(this));
-  
+    const event2 = new CustomEvent(customEvents.GET_DATA_FOR_SWIMLANE, {
+      bubbles: true,
+      cancelable: true,
+      detail: { message: previous },
+    });
+    dipatchEventForId(idConstants.DASHBOARD_SCREEN, event1);
+    dipatchEventForId(idConstants.DASHBOARD_SCREEN, event2);
   }
 
   handleOpenSrForm(event) {
-    const openSrForm = new CustomEvent("SrFormOpened", {
+    dipatchEventForId("sr-form",  new CustomEvent("SrFormOpened", {
       bubbles: true,
       cancelable: true,
-    });
-    dipatchEventForId("sr-form", openSrForm);
+    }));
   }
 
   async handleNewSrCreation(event) {
     const data = event.detail.message;
-    await createSr(data);
+    const response = await createSr(data);
+    if (response.status == 200) {
+      dipatchEventForId(
+        "sr-dialog",
+        new CustomEvent("close-sr-form", {
+          bubbles: true,
+          cancelable: true,
+        })
+      );
+      dipatchEventForId(
+        idConstants.DASHBOARD_SCREEN,
+        new CustomEvent(customEvents.GET_DATA_FOR_SWIMLANE, {
+          bubbles: true,
+          cancelable: true,
+          detail: {
+            message: "ToDo",
+          },
+        })
+      );
+    }
   }
 
-  async handleCardDragged(event) {
-    const data = event.detail.message;
-    await updateSr(data);
+  async handleOpenSrModal(event) {
+    const id = event.detail.message;
+    const data = await getSpecificSr(id);
+    dipatchEventForId(
+      "srDialog",
+      new CustomEvent("openSrDialog", {
+        bubbles: true,
+        cancelable: true,
+        detail: {
+          message: data,
+        },
+      })
+    );
   }
-
   render() {}
 }
 
@@ -130,3 +182,4 @@ customElements.define("custom-router", Router);
 customElements.define("sign-in-screen", SignInScreen);
 customElements.define("sign-in-component", SignIn);
 customElements.define("sr-form", srForm);
+customElements.define("sr-dialog", srDialog);

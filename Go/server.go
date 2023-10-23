@@ -36,9 +36,16 @@ func main() {
 
 	app.Post("/updateSrStatus/:no/:status", func(c *fiber.Ctx) error {
 		return functions.UpdateSr(c, session)
-
 	})
 
+	app.Get("/getSrData/:status",func(c *fiber.Ctx) error {
+		 return functions.GetSrDataForStatus(c,session)
+	})
+   
+	app.Get("/getSpecificSrData/:id",func(c *fiber.Ctx) error {
+		return functions.GetSrDataForId(c,session);
+	})
+	
 	err := app.Listen(":9000")
 	if err != nil {
 		fmt.Println("Failed to start server", err)

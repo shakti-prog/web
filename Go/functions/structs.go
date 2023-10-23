@@ -1,5 +1,7 @@
 package functions
 
+import "time"
+
 type userLogin struct {
 	Email    string `json:"email"`
 	Password string `json:"password"`
@@ -12,6 +14,8 @@ type serviceRequest struct {
 	Status      string `json:"status"`
 	Assignee    string `json:"assignee"`
 	Reporter    string `json:"reporter"`
+	Priority    string `json:"priority"`
+	Title       string `json:"title"`
 }
 
 
@@ -22,7 +26,9 @@ type retrieveSRData struct{
 	Status      string `json:"status"`
 	Assignee    string `json:"assignee"`
 	Reporter    string `json:"reporter"`
-
+	Priority    string `json:"priority"`
+	Title       string `json:"title"`
+    CreatedAt   time.Time `json:"createdAt"`
 }
 
 type TableData struct {
