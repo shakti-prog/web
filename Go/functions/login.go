@@ -34,7 +34,7 @@ func Login(c *fiber.Ctx, session *gocql.Session) error {
 	claims := jwt.MapClaims{
 		"email": email,
 		"admin": true,
-		"exp":   time.Now().Add(time.Minute * 1).Unix(),
+		"exp":   time.Now().Add(time.Hour * 24).Unix(),
 	}
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)

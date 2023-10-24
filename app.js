@@ -63,8 +63,11 @@ class DashboardScreen extends HTMLElement {
       this.handleGetSrData.bind(this)
     );
     this.addEventListener("createNewSr", this.handleNewSrCreation.bind(this));
-    this.addEventListener("draggedEvent", this.handleDragEvent.bind(this));
-    this.addEventListener("openSrModal", this.handleOpenSrModal.bind(this));
+    this.addEventListener(
+      customEvents.STATUS_CHANGE,
+      this.handleStatusChange.bind(this)
+    );
+    this.addEventListener("openSrModal", this.handleOpenSrDialog.bind(this));
   }
 
   async handleGetSrData(event) {
@@ -82,12 +85,10 @@ class DashboardScreen extends HTMLElement {
     );
   }
 
-  async handleDragEvent(event) {
+  async handleStatusChange(event) {
     const id = event.detail.message.no;
     const previous = event.detail.message.previousStatus;
     const status = event.detail.message.status;
-   
-
     await updateSr({ no: id, status });
     const event1 = new CustomEvent(customEvents.GET_DATA_FOR_SWIMLANE, {
       bubbles: true,
@@ -127,7 +128,7 @@ class DashboardScreen extends HTMLElement {
     }
   }
 
-  async handleOpenSrModal(event) {
+  async handleOpenSrDialog(event) {
     const id = event.detail.message;
     const data = await getSpecificSr(id);
     dipatchEventForId(

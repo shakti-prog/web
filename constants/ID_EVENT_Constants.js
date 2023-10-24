@@ -13,7 +13,7 @@ export const customEvents = {
   OPEN_SR_DETAILS_DIALOG: "openSrDialog",
   OPEN_SR_FORM: "open-sr-form",
   CLOSE_SR_FORM: "close-sr-form",
-  DRAGGED_EVENT: "draggedEvent",
+  STATUS_CHANGE: "statusChange",
   GET_DATA_FOR_SWIMLANE: "getSrDataForSwimlane",
   RENDER_SR_DATA: "srData",
 };

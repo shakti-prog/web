@@ -48,7 +48,7 @@ class Card extends HTMLElement {
     const cardAttributes = attributesForCard(type);
     const priority = this.getAttribute("priority");
     const assignee = this.getAttribute("assignee");
-    const createdAt = this.getAttribute('createdAt');
+    const createdAt = this.getAttribute("createdAt");
     this.innerHTML = `
    <div class="w-56 max-h-56 ml-2 mt-4 h-auto p-2.5 bg-white rounded-md border overflow-y-scroll ${
      cardAttributes.borderColor
@@ -130,7 +130,7 @@ class Swimlane extends HTMLElement {
     const { id, status } = JSON.parse(event.dataTransfer.getData("id"));
     dipatchEventForId(
       idConstants.DASHBOARD_SCREEN,
-      new CustomEvent(customEvents.DRAGGED_EVENT, {
+      new CustomEvent(customEvents.STATUS_CHANGE, {
         bubbles: true,
         cancelable: true,
         detail: {
@@ -153,6 +153,7 @@ class Swimlane extends HTMLElement {
   }
 
   render(data) {
+    console.log(data);
     const title = this.getAttribute("title");
     this.innerHTML = `  
   <div class="w-64  h-screen overflow-y-scroll px-1.5 pt-2.5 pb-1 bg-gray-100 rounded-lg flex-col justify-start items-start gap-2 inline-flex">
@@ -171,14 +172,15 @@ class Swimlane extends HTMLElement {
    ${data
      .map(
        (issue) =>
-         `<swim-card  id=${issue.no} status=${issue.status} reporter=${
-           issue.reporter
-         } assignee=${issue.assignee} type=${
-           issue.type
-         } description=${JSON.stringify(issue.description)} priority=${
-           issue.priority
-         }
-           createdAt=${issue.createdAt}
+         `<swim-card  
+         id=${issue.no} 
+         status=${issue.status} 
+          
+         description=${JSON.stringify(issue.description)} 
+         type=${issue.type} 
+         priority=${issue.priority}
+         createdAt=${issue.createdAt}
+         assignee=${issue.assignee} 
          ></swim-card>`
      )
      .join("")}
@@ -365,7 +367,6 @@ class srForm extends HTMLElement {
   }
 
   handleCloseSrForm(event) {
-    console.log("Here");
     document.querySelector("#sr-form-dialog").close();
   }
 
@@ -397,6 +398,8 @@ class srForm extends HTMLElement {
         },
       })
     );
+
+    
   }
 
   render() {
@@ -423,7 +426,6 @@ class srForm extends HTMLElement {
               <label for="type" class="block text-sm font-medium text-gray-700">Title</label>
               <input id="title" class="h-10 w-full border-collapse rounded-lg border" />
             </div>
-
             <div class="mt-4">
               <label for="assignee" class="block text-sm font-medium text-gray-700">Assignee</label>
               <select id="assignee" name="assignee" class="mt-1 w-full rounded border p-2">
@@ -469,14 +471,48 @@ class srForm extends HTMLElement {
 class srDialog extends HTMLElement {
   constructor() {
     super();
+    this.data = null;
   }
   connectedCallback() {
     this.addEventListener("openSrDialog", this.handleDialogBox.bind(this));
   }
 
   handleDialogBox(event) {
-    this.render(event.detail.message);
+    this.data = event.detail.message;
+    this.render(this.data);
+    this.querySelector("#sr-dialog-status").value = event.detail.message.status;
+    this.querySelector("#sr-dialog-priority").value =
+      event.detail.message.priority;
     this.querySelector("#sr-details-dialog").showModal();
+    this.querySelector("#sr-dialog-status").addEventListener("change", this.handleStatusChange.bind(this));
+  }
+
+  handleStatusChange(event) {
+     dipatchEventForId(
+       idConstants.DASHBOARD_SCREEN,
+       new CustomEvent(customEvents.STATUS_CHANGE, {
+         bubbles: true,
+         cancelable: true,
+         detail: {
+           message: {
+             no: this.data.no,
+             previousStatus:this.data.status,
+             status: event.target.value,
+           },
+         },
+       })
+     );
+    
+      dipatchEventForId(
+        idConstants.DASHBOARD_SCREEN,
+        new CustomEvent("openSrModal", {
+          bubbles: true,
+          cancelable: true,
+          detail: {
+            message: this.data.no,
+          },
+        })
+      );
   }
 
   render(data) {
@@ -490,7 +526,7 @@ class srDialog extends HTMLElement {
                 <div class="text-white text-xs font-normal font-sans">Escalation</div>
             </div>
         </div>
-        <div class="w-96 text-slate-900 text-xl font-normal font-sans">As Source one we want to revamp the DGFT token modal so that we can use it more efficiently and DGFT data correctness can be improved. (Delete Product Descriptions)</div>
+        <div class="w-96 text-slate-900 text-xl font-normal font-sans">${data.title}</div>
         <div class="justify-start items-start gap-3 inline-flex">
             <div class="px-4 py-2 bg-white rounded-md shadow border border-zinc-300 justify-center items-center gap-1 flex">
                 <div class="text-slate-900 text-xs font-normal font-sans">Add attachment</div>
@@ -537,34 +573,29 @@ class srDialog extends HTMLElement {
            <div class="px-4 py-3.5 rounded-xl border border-zinc-300 flex-col justify-start items-start gap-8 flex">
             <div class="h-11 flex-col justify-start items-start gap-1.5 flex">
                 <div class="self-stretch text-slate-900 text-xs font-normal font-sans">Status:</div>
-                <div class="w-36 px-3 py-2 bg-white rounded-md shadow border border-zinc-300 justify-start items-center gap-1.5 inline-flex">
-                    <div class="grow shrink basis-0 text-slate-900 text-xs font-normal font-sans">${data.status}</div>
-                    <div class="w-2.5 h-2.5 relative"></div>
-                </div>
+                    <select id="sr-dialog-status" name="sr-dialog-status" class="mt-1 w-36 rounded border p-2  ">
+                       <option value="ToDo">ToDo</option>
+                       <option value="InProgress">InProgress</option>
+                      <option value="Done">Done</option>
+                      <option value="Rejected">Rejected</option>
+                      <option value="Accepted">Accepted</option>
+                   </select>
             </div>
-           
             <div class=" flex-col justify-start items-start gap-1.5 flex">
                 <div class="self-stretch text-slate-900 text-xs font-normal font-sans">Reporter:</div>
                 <div class="w-36 px-3 py-2 bg-white rounded-md shadow border border-zinc-300 justify-start items-center gap-1.5 inline-flex">
                     <div class="grow shrink basis-0 text-slate-900 text-xs font-normal font-sans">${data.reporter}</div>
-                    <div class="w-2.5 h-2.5 relative"></div>
                 </div>
             </div>
 
              <div class=" flex-col justify-start items-start gap-1.5 flex">
                 <div class="self-stretch text-slate-900 text-xs font-normal font-sans">Priority:</div>
-                <div class="w-36 px-3 py-2 bg-white rounded-md shadow border border-zinc-300 justify-start items-center gap-1.5 inline-flex">
-                    <div class="grow shrink basis-0 text-slate-900 text-xs font-normal font-sans">${data.priority}</div>
-                    <div class="w-2.5 h-2.5 relative"></div>
-                </div>
-            </div>
-           
-            <div class="h-11 flex-col justify-start items-start gap-1.5 flex">
-                <div class="self-stretch text-slate-900 text-xs font-normal font-sans">Labels</div>
-                <div class="w-36 px-3 py-2 bg-white rounded-md shadow border border-zinc-300 justify-start items-center gap-1.5 inline-flex">
-                    <div class="grow shrink basis-0 text-zinc-500 text-xs font-normal font-sans">Select Lables</div>
-                    <div class="w-2.5 h-2.5 relative"></div>
-                </div>
+                    <select id="sr-dialog-priority" name="sr-dialog-priority" class="mt-1 w-36 rounded border p-2  ">
+                       <option value="Highest">Highest</option>
+                       <option value="High">High</option>
+                      <option value="Medium">Medium</option>
+                      <option value="Low">Low</option>
+                   </select>
             </div>
             <div class="self-stretch h-11 flex-col justify-start items-start gap-1.5 flex">
                 <div class="self-stretch text-slate-900 text-xs font-normal font-sans">Request Points:</div>

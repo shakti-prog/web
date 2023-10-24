@@ -2,14 +2,13 @@ package functions
 
 import (
 	"fmt"
+	"github.com/gocql/gocql"
+	"github.com/gofiber/fiber/v2"
 	"sort"
 	"strconv"
 	"strings"
 	"time"
-	"github.com/gocql/gocql"
-	"github.com/gofiber/fiber/v2"
 )
-
 
 func CreateNewSr(c *fiber.Ctx, session *gocql.Session) error {
 	p := new(serviceRequest)
@@ -56,7 +55,7 @@ func UpdateSr(c *fiber.Ctx, session *gocql.Session) error {
 
 func GetSrDataForStatus(c *fiber.Ctx, session *gocql.Session) error {
 	status := c.Params("status")
-	query := session.Query("Select no,description,Type,status,assignee,title,priority,createdAt from serviceRequest where status = ? ALLOW FILTERING", status)
+	query := session.Query("Select no,description,Type,status,assignee,title,priority,createdAt,updatedAt from serviceRequest where status = ? ALLOW FILTERING", status)
 	var data []retrieveSRData
 	scanner := query.Iter().Scanner()
 	for scanner.Next() {
@@ -68,14 +67,15 @@ func GetSrDataForStatus(c *fiber.Ctx, session *gocql.Session) error {
 		var priority string
 		var title string
 		var createdAt time.Time
-		err := scanner.Scan(&no, &description, &Type, &status, &assignee,&title,&priority,&createdAt)
+		var updatedAt time.Time
+		err := scanner.Scan(&no, &description, &Type, &status, &assignee, &title, &priority, &createdAt,&updatedAt)
 		if err != nil {
 			return c.SendStatus(fiber.StatusInternalServerError)
 		}
-		data1 := retrieveSRData{No: no, Description: strings.Split(description, " "), Type: Type, Status: status, Assignee: assignee,Priority:priority,Title: title,CreatedAt: createdAt}
+		data1 := retrieveSRData{No: no, Description: strings.Split(description, " "), Type: Type, Status: status, Assignee: assignee, Priority: priority, Title: title, CreatedAt: createdAt,UpdatedAt: updatedAt}
 		data = append(data, data1)
 	}
-    sort.Slice(data,func(i, j int) bool {
+	sort.Slice(data, func(i, j int) bool {
 		return data[j].UpdatedAt.Before(data[i].UpdatedAt)
 	})
 	return c.Status(fiber.StatusOK).JSON(fiber.Map{"data": data})
@@ -86,25 +86,27 @@ func GetSrDataForId(c *fiber.Ctx, session *gocql.Session) error {
 	if err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"Error": "Invalid Id"})
 	}
-	query := session.Query("Select no,description,Type,status,reporter,assignee,priority,createdAt,updatedAt from serviceRequest where no = ? ALLOW FILTERING", id)
+	query := session.Query("Select no,description,title,Type,status,reporter,assignee,priority,createdAt,updatedAt from serviceRequest where no = ? ALLOW FILTERING", id)
 	var no int64
 	var description string
+	var title string
 	var Type string
 	var status string
 	var assignee string
 	var reporter string
 	var priority string
-    var createdAt time.Time
+	var createdAt time.Time
 	var updatedAt time.Time
-	err = query.Scan(&no, &description, &Type, &status,&reporter,&assignee,&priority,&createdAt,&updatedAt)
+	err = query.Scan(&no, &description, &title, &Type, &status, &reporter, &assignee, &priority, &createdAt, &updatedAt)
 	if err != nil {
-		fmt.Println(err);
+		fmt.Println(err)
 		return c.Status(fiber.StatusBadGateway).JSON(fiber.Map{"Error": "No such card exists"})
 	}
 
 	return c.Status(fiber.StatusOK).JSON(fiber.Map{
 		"no":          no,
 		"description": description,
+		"title":       title,
 		"type":        Type,
 		"status":      status,
 		"assignee":    assignee,
