@@ -86,8 +86,7 @@ class DashboardScreen extends HTMLElement {
     const id = event.detail.message.no;
     const previous = event.detail.message.previousStatus;
     const status = event.detail.message.status;
-    console.log(previous);
-    console.log(status);
+   
 
     await updateSr({ no: id, status });
     const event1 = new CustomEvent(customEvents.GET_DATA_FOR_SWIMLANE, {

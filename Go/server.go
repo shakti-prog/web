@@ -26,10 +26,6 @@ func main() {
 		return functions.SignUp(c, session)
 	})
 
-	app.Get("/getSrData", func(c *fiber.Ctx) error {
-		return functions.GetSrData(c, session)
-	})
-
 	app.Post("/createSr", func(c *fiber.Ctx) error {
 		return functions.CreateNewSr(c, session)
 	})

@@ -1,4 +1,8 @@
-import { dipatchEventForId, attributesForCard, svgForPriority } from "../Functions/helper.js";
+import {
+  dipatchEventForId,
+  attributesForCard,
+  svgForPriority,
+} from "../Functions/helper.js";
 import { customEvents, idConstants } from "../constants/ID_EVENT_Constants.js";
 
 class Card extends HTMLElement {
@@ -39,11 +43,12 @@ class Card extends HTMLElement {
 
   render() {
     const id = this.getAttribute("id");
-    const reporter = this.getAttribute("reporter");
     const type = this.getAttribute("type");
     const description = JSON.parse(this.getAttribute("description"));
     const cardAttributes = attributesForCard(type);
     const priority = this.getAttribute("priority");
+    const assignee = this.getAttribute("assignee");
+    const createdAt = this.getAttribute('createdAt');
     this.innerHTML = `
    <div class="w-56 max-h-56 ml-2 mt-4 h-auto p-2.5 bg-white rounded-md border overflow-y-scroll ${
      cardAttributes.borderColor
@@ -85,8 +90,8 @@ class Card extends HTMLElement {
     </div> 
 </div>
   <div class="self-stretch justify-between items-start inline-flex">
-    <div class="text-zinc-500 text-xs font-normal opacity-60 ">${reporter}</div>
-    <div class="text-zinc-500 text-xs font-normal ">6 days ago</div>
+    <div class="text-zinc-500 text-xs font-normal opacity-60 ">${assignee}</div>
+    <div class="text-zinc-500 text-xs font-normal ">5 days ago</div>
   </div>
 </div>
   
@@ -170,7 +175,11 @@ class Swimlane extends HTMLElement {
            issue.reporter
          } assignee=${issue.assignee} type=${
            issue.type
-         } description=${JSON.stringify(issue.description)} priority=${issue.priority}></swim-card>`
+         } description=${JSON.stringify(issue.description)} priority=${
+           issue.priority
+         }
+           createdAt=${issue.createdAt}
+         ></swim-card>`
      )
      .join("")}
   </div>
@@ -317,7 +326,7 @@ class srForm extends HTMLElement {
   constructor() {
     super();
     this.srData = {
-      type: "Story",
+      type: "Bug",
       title: "",
       description: "",
       assignee: "Test1",
@@ -541,18 +550,15 @@ class srDialog extends HTMLElement {
                     <div class="w-2.5 h-2.5 relative"></div>
                 </div>
             </div>
-            <div class="h-11 flex-col justify-start items-start gap-1.5 flex">
+
+             <div class=" flex-col justify-start items-start gap-1.5 flex">
                 <div class="self-stretch text-slate-900 text-xs font-normal font-sans">Priority:</div>
                 <div class="w-36 px-3 py-2 bg-white rounded-md shadow border border-zinc-300 justify-start items-center gap-1.5 inline-flex">
-                    <div class="grow shrink basis-0 h-3 justify-start items-center gap-1.5 flex">
-                        <div class="w-3 h-3 relative">
-                            <div class="left-[2px] top-[3.33px] absolute flex-col justify-start items-start gap-0.5 inline-flex"></div>
-                        </div>
-                        <div class="grow shrink basis-0 text-slate-900 text-xs font-normal font-sans">Medium</div>
-                    </div>
+                    <div class="grow shrink basis-0 text-slate-900 text-xs font-normal font-sans">${data.priority}</div>
                     <div class="w-2.5 h-2.5 relative"></div>
                 </div>
             </div>
+           
             <div class="h-11 flex-col justify-start items-start gap-1.5 flex">
                 <div class="self-stretch text-slate-900 text-xs font-normal font-sans">Labels</div>
                 <div class="w-36 px-3 py-2 bg-white rounded-md shadow border border-zinc-300 justify-start items-center gap-1.5 inline-flex">
@@ -567,8 +573,8 @@ class srDialog extends HTMLElement {
                 </div>
             </div>
             <div class="flex-col justify-start items-start gap-1 flex">
-                <div class="text-zinc-500 text-xs font-normal font-sans">Created 3 days ago</div>
-                <div class="text-zinc-500 text-xs font-normal font-sans">Updated 3 days ago</div>
+                <div class="text-zinc-500 text-xs font-normal font-sans">Created - ${data.createdAt} Days Ago</div>
+                <div class="text-zinc-500 text-xs font-normal font-sans">Updated - ${data.updatedAt} Days Ago</div>
             </div>
         </div>
     </div>

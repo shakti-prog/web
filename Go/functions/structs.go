@@ -29,6 +29,7 @@ type retrieveSRData struct{
 	Priority    string `json:"priority"`
 	Title       string `json:"title"`
     CreatedAt   time.Time `json:"createdAt"`
+	UpdatedAt   time.Time `json:"updatedAt"`
 }
 
 type TableData struct {

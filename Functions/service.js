@@ -1,11 +1,6 @@
 import { url } from "../constants/urlConstants.js";
 import { dipatchEventForId } from "./helper.js";
 
-export async function fetchSrData() {
-  const response = await fetch(`${url}/getSrData`);
-  const { accepted, rejected, toDo, inProgress, done } = await response.json();
-  return { accepted, rejected, toDo, inProgress, done };
-}
 
 export async function signIn(details) {
   const options = {
