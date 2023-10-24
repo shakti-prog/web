@@ -40,13 +40,31 @@ func CreateNewSr(c *fiber.Ctx, session *gocql.Session) error {
 
 }
 
-func UpdateSr(c *fiber.Ctx, session *gocql.Session) error {
+func UpdateSrStatus(c *fiber.Ctx, session *gocql.Session) error {
 	no, err := strconv.ParseInt(c.Params("no"), 10, 64)
 	if err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"Err": "Invalid SR number"})
 	}
 	status := c.Params("status")
 	query := session.Query("Update servicerequest set status = ?,updatedAt = toTimestamp(now())  where no = ?", status, no)
+	if err := query.Exec(); err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"Err": "Could not update SR"})
+	}
+	return c.Status(fiber.StatusOK).JSON(fiber.Map{"Message": "SR Successfully Updated"})
+}
+
+func UpdateSr(c *fiber.Ctx, session *gocql.Session) error {
+	no, err := strconv.ParseInt(c.Params("no"), 10, 64)
+	if err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"Err": "Invalid SR number"})
+	}
+	p := new(SrFieldUpdate)
+	if err = c.BodyParser(p); err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"Error": "Details are missing"})
+	}
+	field := p.Field;
+	value := p.Value;
+	query := session.Query("Update servicerequest set " + field + " = ?  where no = ?", value, no)
 	if err := query.Exec(); err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"Err": "Could not update SR"})
 	}

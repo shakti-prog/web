@@ -31,7 +31,11 @@ func main() {
 	})
 
 	app.Post("/updateSrStatus/:no/:status", func(c *fiber.Ctx) error {
-		return functions.UpdateSr(c, session)
+		return functions.UpdateSrStatus(c, session)
+	})
+    
+	app.Post("updateSr/:no" ,func(c *fiber.Ctx) error {
+		 return functions.UpdateSr(c,session);
 	})
 
 	app.Get("/getSrData/:status",func(c *fiber.Ctx) error {

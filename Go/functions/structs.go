@@ -36,3 +36,9 @@ type TableData struct {
 	Name string `json:"name"`
 	Age  string `json:"age"`
 }
+
+
+type SrFieldUpdate struct{
+	 Field string `json:"field"`
+	 Value string `json:"value"`
+}

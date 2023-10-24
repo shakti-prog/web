@@ -108,3 +108,30 @@ export async function getSpecificSr(id) {
     };
   }
 }
+
+
+export async function updateSrField(id, field, value) {
+   const obj = {
+     field: field,
+     value: value,
+   };
+  const options = {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(obj),
+  };
+  try {
+     const response = await fetch(`${url}/updateSr/${id}`, options);
+     return response;
+  }
+  catch (error) {
+    console.log(error);
+    return {
+      "Error":error
+    }
+
+  }
+  
+}

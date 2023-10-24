@@ -3,13 +3,13 @@ import {
   signIn,
   fetchSrDataForSwimlane,
   updateSr,
-  getSpecificSr
+  getSpecificSr,
+  updateSrField,
 } from "./Functions/service.js";
 import {
   RouterComponent,
   handleResponse,
   dipatchEventForId,
-
 } from "./Functions/helper.js";
 import {
   Card,
@@ -48,9 +48,7 @@ class MainPage extends HTMLElement {
   constructor() {
     super();
   }
-  connectedCallback() {
-
-  }
+  connectedCallback() {}
 }
 
 class DashboardScreen extends HTMLElement {
@@ -68,6 +66,14 @@ class DashboardScreen extends HTMLElement {
       this.handleStatusChange.bind(this)
     );
     this.addEventListener("openSrModal", this.handleOpenSrDialog.bind(this));
+    this.addEventListener("updateSrField", this.handleSrFieldChange.bind(this));
+  }
+
+  async handleSrFieldChange(event) {
+    const field = event.detail.message.field;
+    const value = event.detail.message.value;
+    const id = event.detail.message.id;
+    await updateSrField(id, field, value);
   }
 
   async handleGetSrData(event) {
