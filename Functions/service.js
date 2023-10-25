@@ -25,7 +25,6 @@ export async function signIn(details) {
   }
 }
 
-export async function signUp() {}
 
 export async function createSr(srData) {
   const serviceRequestObject = {

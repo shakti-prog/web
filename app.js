@@ -18,6 +18,7 @@ import {
   SignIn,
   srForm,
   srDialog,
+  MultiSelect,
 } from "./Components/components.js";
 import { customEvents, idConstants } from "./constants/ID_EVENT_Constants.js";
 
@@ -64,6 +65,7 @@ class DashboardScreen extends HTMLElement {
     this.addEventListener(
       customEvents.STATUS_CHANGE,
       this.handleStatusChange.bind(this)
+      
     );
     this.addEventListener("openSrModal", this.handleOpenSrDialog.bind(this));
     this.addEventListener("updateSrField", this.handleSrFieldChange.bind(this));
@@ -195,3 +197,4 @@ customElements.define("sign-in-screen", SignInScreen);
 customElements.define("sign-in-component", SignIn);
 customElements.define("sr-form", srForm);
 customElements.define("sr-dialog", srDialog);
+customElements.define("multi-select",MultiSelect)

@@ -92,9 +92,6 @@ class Card extends HTMLElement {
           </div>
         </div>
       </div>
-      <div class="inline-flex flex-col items-center justify-start gap-2 rounded-lg bg-gray-200 p-1">
-        <div class="mb-2 h-2 w-2 text-center font-serif text-xs font-normal text-black">4</div>
-      </div>
     </div>
   </div>
   <div class="w-48 h-16 text-black text-sm font-normal font-sans leading-none overflow-hidden">
@@ -261,18 +258,21 @@ class SwimlaneBody extends HTMLElement {
                 <div class="text-zinc-500 text-xs font-normal font-['Gilroy-SemiBold']">SRCO Board</div>
             </div>
             <div class="flex justify-between items-center">
-    <div class="text-slate-900 text-xl font-normal font-bold ">
-        SRCO Sprint 115
-    </div>
-    <div class="ml-auto">
-        <button style="font-size:14px" id="createSrButton" class="bg-blue-500 hover:bg-blue-700 text-white py-1 px-2 ml-16  rounded">
-            Create Issue
-        </button>
-    </div>
-</div>
+               <div class="text-slate-900 text-xl font-normal font-bold ">
+                    SRCO Sprint 115
+              </div>
+              <div class="ml-auto">
+                <button style="font-size:14px" id="createSrButton" class="bg-blue-500 hover:bg-blue-700 text-white py-1 px-2 ml-16  rounded">
+                  Create Sr
+                 </button>
+              </div>
+             <div>
+          </div>
+        </div>
         </div>
     </div>
 </div>
+   
        <div style="width: 1180px; justify-content: flex-start; align-items: flex-start; gap: 12px; display: inline-flex; margin-Top:8px;">
          <swim-lane class="flex-1" title="ToDo" id="ToDo"></swim-lane>
        <swim-lane class="flex-1" title="InProgress" id="InProgress"></swim-lane>
@@ -358,7 +358,7 @@ class srForm extends HTMLElement {
       title: "",
       description: "",
       assignee: "Test1",
-      reporter: localStorage.getItem("name"),
+      reporter: "Test3",
       priority: "Highest",
       status: "ToDo",
     };
@@ -371,25 +371,35 @@ class srForm extends HTMLElement {
 
   handleOpenSrForm(event) {
     this.render();
-    document.querySelector("#sr-form-dialog").showModal();
-    document
-      .querySelector("#type")
-      .addEventListener("change", this.handleTypeChange.bind(this)); //Replace this with querySelector
-    document
-      .querySelector("#title")
-      .addEventListener("change", this.handleTitleChange.bind(this));
-    document
-      .querySelector("#assignee")
-      .addEventListener("change", this.handleAssigneeChange.bind(this));
-    document
-      .querySelector("#priority")
-      .addEventListener("change", this.handlePriorityChange.bind(this));
-    document
-      .querySelector("#description")
-      .addEventListener("change", this.handleDescriptionChange.bind(this));
-    document
-      .querySelector("#create-sr-button")
-      .addEventListener("click", this.handleSubmitChange.bind(this));
+    this.querySelector("#sr-form-dialog").showModal();
+    this.querySelector("#type").addEventListener(
+      "change",
+      this.handleTypeChange.bind(this)
+    ); //Replace this with querySelector
+    this.querySelector("#title").addEventListener(
+      "change",
+      this.handleTitleChange.bind(this)
+    );
+    this.querySelector("#assignee").addEventListener(
+      "change",
+      this.handleAssigneeChange.bind(this)
+    );
+    this.querySelector("#reporter").addEventListener(
+      "change",
+      this.handleReporterChange.bind(this)
+    );
+    this.querySelector("#priority").addEventListener(
+      "change",
+      this.handlePriorityChange.bind(this)
+    );
+    this.querySelector("#description").addEventListener(
+      "change",
+      this.handleDescriptionChange.bind(this)
+    );
+    this.querySelector("#create-sr-button").addEventListener(
+      "click",
+      this.handleSubmitChange.bind(this)
+    );
   }
 
   handleCloseSrForm(event) {
@@ -405,6 +415,11 @@ class srForm extends HTMLElement {
   handleAssigneeChange(event) {
     this.srData.assignee = event.target.value;
   }
+
+  handleReporterChange(event) {
+    this.srData.reporter = event.target.value;
+  }
+
   handleDescriptionChange(event) {
     this.srData.description = event.target.value;
   }
@@ -461,7 +476,9 @@ class srForm extends HTMLElement {
             <div class="mt-4">
               <label for="reporter" class="block text-sm font-medium text-gray-700">Reporter</label>
               <select id="reporter" name="reporter" class="disabled mt-1 w-full rounded border p-2">
-                <option value="mary">Shakti</option>
+                <option value="Test1">Test1</option>
+                <option value="Test2">Test2</option>
+                <option value="Test3">Test3</option>
               </select>
             </div>
             <div class="mt-4">
@@ -521,6 +538,12 @@ class srDialog extends HTMLElement {
       "change",
       this.handleAssigneeChange.bind(this)
     );
+    this.querySelector("#sr-dialog-reporter").value =
+      event.detail.message.reporter;
+    this.querySelector("#sr-dialog-reporter").addEventListener(
+      "change",
+      this.handleReporterChange.bind(this)
+    );
     this.querySelector("#sr-details-dialog").showModal();
   }
 
@@ -576,18 +599,41 @@ class srDialog extends HTMLElement {
     );
   }
 
+  handleReporterChange(event) {
+    dipatchEventForId(
+      idConstants.DASHBOARD_SCREEN,
+      new CustomEvent("updateSrField", {
+        bubbles: true,
+        cancelable: true,
+        detail: {
+          message: {
+            id: this.data.no,
+            field: "reporter",
+            value: event.target.value,
+          },
+        },
+      })
+    );
+  }
+
   render(data) {
     this.innerHTML = `  
      <dialog id="sr-details-dialog" class="w-3/5 h-4/5 rounded-lg">
      <div class="w-full h-full pl-6 pr-0.5 py-6 bg-white justify-center items-start gap-8 inline-flex" >
     <div class="flex-col justify-start items-start gap-2 inline-flex w-3/5">
         <div class="justify-start items-center gap-4 inline-flex">
-            <div class="text-slate-900 text-xs font-normal font-sans">SR - ${data.no}</div>
-            <div class="px-1.5 py-0.5 bg-red-700 rounded-sm justify-start items-center gap-1 flex">
-                <div class="text-white text-xs font-normal font-sans">Escalation</div>
+            <div class="text-slate-900 text-xs font-normal font-sans">SR - ${
+              data.no
+            }</div>
+            <div class="px-1.5 py-0.5 ${
+              attributesForCard(data.type).color
+            } rounded-sm justify-start items-center gap-1 flex">
+                ${attributesForCard(data.type).svg}
             </div>
         </div>
-        <div class="w-96 text-slate-900 text-xl font-normal font-sans">${data.title}</div>
+        <div class="w-96 text-slate-900 text-xl font-normal font-sans">${
+          data.title
+        }</div>
         <div class="justify-start items-start gap-3 inline-flex">
             <div class="px-4 py-2 bg-white rounded-md shadow border border-zinc-300 justify-center items-center gap-1 flex">
                 <div class="text-slate-900 text-xs font-normal font-sans">Add attachment</div>
@@ -658,10 +704,20 @@ class srDialog extends HTMLElement {
                       <option value="Test3">Test3</option>
                    </select>
             </div>
-              <div class=" flex-col w-full justify-start items-start gap-1.5 flex">
-                <div class="self-stretch text-slate-900 text-sm font-normal font-sans">Points</div>
-                    <input type="number" class="w-full rounded-md h-8 border border-2"/>
-            </div> 
+            <div class=" flex-col w-full justify-start items-start gap-1.5 flex">
+                <div class="self-stretch text-slate-900 text-sm font-normal font-sans">Reporter</div>
+                    <select id="sr-dialog-reporter" name="sr-dialog-reporter" class="mt-1 w-full rounded border p-2">
+                       <option value="Test1">Test1</option>
+                       <option value="Test2">Test2</option>
+                      <option value="Test3">Test3</option>
+                   </select>
+            </div>
+             <div class=" flex-col w-full justify-start items-start gap-1.5 flex">
+                <div class="self-stretch text-slate-900 text-sm font-normal font-sans">Type</div>
+                    <select id="sr-dialog-type" name="sr-dialog-type" class="mt-1 w-full rounded border p-2">
+                       <option value="Test1">${data.type}</option>
+                   </select>
+            </div>
         </div>
     </div>
 </div>
@@ -670,4 +726,55 @@ class srDialog extends HTMLElement {
   }
 }
 
-export { Card, Swimlane, SwimlaneBody, SignIn, srForm, srDialog };
+class MultiSelect extends HTMLElement {
+  constructor() {
+    super();
+  }
+  connectedCallback() {
+    this.render();
+    const selectButton = this.querySelector(".select-btn"),
+      items = this.querySelectorAll(".item");
+    selectButton.addEventListener("click", () => {
+      selectButton.classList.toggle("open");
+    });
+    items.forEach((item) => {
+      item.addEventListener("click", () => {
+        item.classList.toggle("checked");
+        let checked = this.querySelectorAll(".checked"),
+          btnText = this.querySelector(".btn-text");
+        if (checked && checked.length > 0) {
+          let string = "";
+          checked.forEach((check) =>
+            string += check.innerText + ",")
+          btnText.innerText = string;
+         
+        } else {
+          btnText.innerText = "Select language";
+        }
+      });
+    });
+  }
+
+  render() {
+    this.innerHTML = `
+      <div class="container">
+        <div class="select-btn">
+            <span class="btn-text">Select language</span>
+        </div>
+        <ul class="list-items">
+           <li class="item">
+                 HTML and CSS
+           </li>
+           <li class="item">
+                 BootStrap
+           </li>
+           <li class="item">
+                 Javascript
+           </li>
+        </ul>
+      </div>
+      `;
+  }
+}
+
+export { Card, Swimlane, SwimlaneBody, SignIn, srForm, srDialog, MultiSelect };
