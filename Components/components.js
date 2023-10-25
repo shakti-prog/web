@@ -9,11 +9,26 @@ class Card extends HTMLElement {
   constructor() {
     super();
     this.draggable = true;
+    this.cardDetails = {
+      id: "",
+      type: "",
+      description: "",
+      priority: "",
+      assignee: "",
+      cardAttributes: {},
+    };
   }
 
   connectedCallback() {
     this.addEventListener("dragstart", this.handleDragStart.bind(this));
     this.addEventListener("dblclick", this.handleDoubleClick.bind(this));
+    this.cardDetails.id = this.getAttribute("id");
+    this.cardDetails.type = this.getAttribute("type");
+    this.cardDetails.description = JSON.parse(this.getAttribute("description"));
+    this.cardDetails.priority = this.getAttribute("priority");
+    this.cardDetails.assignee = this.getAttribute("assignee");
+    this.cardDetails.cardAttributes = attributesForCard(this.cardDetails.type);
+    this.addEventListener("handleRender", this.handleRender.bind(this));
     this.render();
   }
 
@@ -41,32 +56,39 @@ class Card extends HTMLElement {
     );
   }
 
+  handleRender(event) {
+    const data = event.detail.message;
+    this.cardDetails.type = data.no;
+    this.cardDetails.description = data.description;
+    this.cardDetails.priority = data.priority;
+    this.cardDetails.assignee = data.assignee;
+    this.cardDetails.cardAttributes = attributesForCard(data.type);
+    this.render();
+  }
+
   render() {
-    const id = this.getAttribute("id");
-    const type = this.getAttribute("type");
-    const description = JSON.parse(this.getAttribute("description"));
-    const cardAttributes = attributesForCard(type);
-    const priority = this.getAttribute("priority");
-    const assignee = this.getAttribute("assignee");
-    const createdAt = this.getAttribute("createdAt");
     this.innerHTML = `
-   <div class="w-56 max-h-56 ml-2 mt-4 h-auto p-2.5 bg-white rounded-md border overflow-y-scroll ${
-     cardAttributes.borderColor
-   } flex-col justify-start items-start gap-3 inline-flex">
+   <div id=${
+     this.cardDetails.id
+   } class="w-56 max-h-56 ml-2 mt-4 h-auto p-2.5 bg-white rounded-md border overflow-y-scroll ${
+      this.cardDetails.cardAttributes.borderColor
+    } flex-col justify-start items-start gap-3 inline-flex">
   <div class="self-stretch justify-between items-center inline-flex">
-    <div class="text-zinc-500 opacity-60 text-xs font-normal font-sans">SRCO-${id}</div>
+    <div class="text-zinc-500 opacity-60 text-xs font-normal font-sans">SRCO-${
+      this.cardDetails.id
+    }</div>
      <div class="flex items-center justify-start gap-1.5">
       <div class="relative h-4 w-4">
         <div class="absolute left-0 top-0 h-4 w-4 rounded-sm ${
-          cardAttributes.color
+          this.cardDetails.cardAttributes.color
         }">
-         ${cardAttributes.svg}
+         ${this.cardDetails.cardAttributes.svg}
         </div>
       </div>
       <div class="relative h-4 w-4">
         <div class="absolute left-0 top-0 h-4 w-4">
           <div class="absolute left-[1.78px] top-[3.11px] h-2.5 w-3">
-            ${svgForPriority(priority)}
+            ${svgForPriority(this.cardDetails.priority)}
           </div>
         </div>
       </div>
@@ -76,7 +98,11 @@ class Card extends HTMLElement {
     </div>
   </div>
   <div class="w-48 h-16 text-black text-sm font-normal font-sans leading-none overflow-hidden">
-    <p class="leading-5"> ${description.join(" ")} </p>
+    <p class="leading-5"> ${
+      Array.isArray(this.cardDetails.description)
+        ? this.cardDetails.description.join(" ")
+        : this.cardDetails.description
+    } </p>
   </div>
  <div class="self-stretch justify-start items-start gap-1.5 flex flex-wrap">
     <div class="px-1.5 py-1 bg-red-100 rounded justify-center items-center gap-1.5 flex">
@@ -90,7 +116,9 @@ class Card extends HTMLElement {
     </div> 
 </div>
   <div class="self-stretch justify-between items-start inline-flex">
-    <div class="text-zinc-500 text-xs font-normal opacity-60 ">${assignee}</div>
+    <div class="text-zinc-500 text-xs font-normal opacity-60 ">${
+      this.cardDetails.assignee
+    }</div>
     <div class="text-zinc-500 text-xs font-normal ">5 days ago</div>
   </div>
 </div>
@@ -153,7 +181,6 @@ class Swimlane extends HTMLElement {
   }
 
   render(data) {
-    console.log(data);
     const title = this.getAttribute("title");
     this.innerHTML = `  
   <div class="w-64  h-screen overflow-y-scroll px-1.5 pt-2.5 pb-1 bg-gray-100 rounded-lg flex-col justify-start items-start gap-2 inline-flex">
@@ -175,7 +202,6 @@ class Swimlane extends HTMLElement {
          `<swim-card  
          id=${issue.no} 
          status=${issue.status} 
-          
          description=${JSON.stringify(issue.description)} 
          type=${issue.type} 
          priority=${issue.priority}
@@ -398,8 +424,6 @@ class srForm extends HTMLElement {
         },
       })
     );
-
-    
   }
 
   render() {
@@ -481,45 +505,82 @@ class srDialog extends HTMLElement {
     this.data = event.detail.message;
     this.render(this.data);
     this.querySelector("#sr-dialog-status").value = event.detail.message.status;
+    this.querySelector("#sr-dialog-status").addEventListener(
+      "change",
+      this.handleStatusChange.bind(this)
+    );
     this.querySelector("#sr-dialog-priority").value =
       event.detail.message.priority;
+    this.querySelector("#sr-dialog-priority").addEventListener(
+      "change",
+      this.handlePriorityChange.bind(this)
+    );
+    this.querySelector("#sr-dialog-assignee").value =
+      event.detail.message.assignee;
+    this.querySelector("#sr-dialog-assignee").addEventListener(
+      "change",
+      this.handleAssigneeChange.bind(this)
+    );
     this.querySelector("#sr-details-dialog").showModal();
-    this.querySelector("#sr-dialog-status").addEventListener("change", this.handleStatusChange.bind(this));
   }
 
   handleStatusChange(event) {
-     dipatchEventForId(
-       idConstants.DASHBOARD_SCREEN,
-       new CustomEvent(customEvents.STATUS_CHANGE, {
-         bubbles: true,
-         cancelable: true,
-         detail: {
-           message: {
-             no: this.data.no,
-             previousStatus:this.data.status,
-             status: event.target.value,
-           },
-         },
-       })
-     );
-    
-      dipatchEventForId(
-        idConstants.DASHBOARD_SCREEN,
-        new CustomEvent("openSrModal", {
-          bubbles: true,
-          cancelable: true,
-          detail: {
-            message: this.data.no,
+    dipatchEventForId(
+      idConstants.DASHBOARD_SCREEN,
+      new CustomEvent(customEvents.STATUS_CHANGE, {
+        bubbles: true,
+        cancelable: true,
+        detail: {
+          message: {
+            no: this.data.no,
+            previousStatus: this.data.status,
+            status: event.target.value,
+            reRender: true,
           },
-        })
-      );
+        },
+      })
+    );
+  }
+
+  handlePriorityChange(event) {
+    dipatchEventForId(
+      idConstants.DASHBOARD_SCREEN,
+      new CustomEvent("updateSrField", {
+        bubbles: true,
+        cancelable: true,
+        detail: {
+          message: {
+            id: this.data.no,
+            field: "Priority",
+            value: event.target.value,
+          },
+        },
+      })
+    );
+  }
+
+  handleAssigneeChange(event) {
+    dipatchEventForId(
+      idConstants.DASHBOARD_SCREEN,
+      new CustomEvent("updateSrField", {
+        bubbles: true,
+        cancelable: true,
+        detail: {
+          message: {
+            id: this.data.no,
+            field: "assignee",
+            value: event.target.value,
+          },
+        },
+      })
+    );
   }
 
   render(data) {
     this.innerHTML = `  
-     <dialog id="sr-details-dialog">
-     <div class="w-full h-auto pl-6 pr-0.5 py-6 bg-white justify-center items-start gap-8 inline-flex" role="dialog">
-    <div class="flex-col justify-start items-start gap-4 inline-flex">
+     <dialog id="sr-details-dialog" class="w-3/5 h-4/5 rounded-lg">
+     <div class="w-full h-full pl-6 pr-0.5 py-6 bg-white justify-center items-start gap-8 inline-flex" >
+    <div class="flex-col justify-start items-start gap-2 inline-flex w-3/5">
         <div class="justify-start items-center gap-4 inline-flex">
             <div class="text-slate-900 text-xs font-normal font-sans">SR - ${data.no}</div>
             <div class="px-1.5 py-0.5 bg-red-700 rounded-sm justify-start items-center gap-1 flex">
@@ -535,7 +596,6 @@ class srDialog extends HTMLElement {
             <div class="px-4 py-2 bg-white rounded-md shadow border border-zinc-300 justify-center items-center gap-1 flex">
                 <div class="text-slate-900 text-xs font-normal font-sans">Link issue</div>
                 <div class="w-3 h-3 relative">
-
                 </div>
             </div>
             <div class="px-4 py-2 bg-white rounded-md shadow border border-zinc-300 justify-center items-center gap-1 flex">
@@ -569,11 +629,11 @@ class srDialog extends HTMLElement {
             </div>
         </div>
     </div>
-    <div class="flex-col justify-start items-start gap-3 inline-flex">
-           <div class="px-4 py-3.5 rounded-xl border border-zinc-300 flex-col justify-start items-start gap-8 flex">
-            <div class="h-11 flex-col justify-start items-start gap-1.5 flex">
-                <div class="self-stretch text-slate-900 text-xs font-normal font-sans">Status:</div>
-                    <select id="sr-dialog-status" name="sr-dialog-status" class="mt-1 w-36 rounded border p-2  ">
+    <div class="flex-col justify-start w-1/3 h-auto items-start gap-3 inline-flex">
+           <div class="px-4 py-3.5 w-full rounded-xl border border-zinc-300 flex-col justify-start items-start gap-8 flex">
+            <div class=" flex-col w-full justify-start items-start gap-1.5 flex">
+                <div class="self-stretch text-slate-900 text-sm font-normal font-sans">Status:</div>
+                    <select id="sr-dialog-status" name="sr-dialog-status" class="mt-1 w-full rounded border p-2  ">
                        <option value="ToDo">ToDo</option>
                        <option value="InProgress">InProgress</option>
                       <option value="Done">Done</option>
@@ -581,32 +641,27 @@ class srDialog extends HTMLElement {
                       <option value="Accepted">Accepted</option>
                    </select>
             </div>
-            <div class=" flex-col justify-start items-start gap-1.5 flex">
-                <div class="self-stretch text-slate-900 text-xs font-normal font-sans">Reporter:</div>
-                <div class="w-36 px-3 py-2 bg-white rounded-md shadow border border-zinc-300 justify-start items-center gap-1.5 inline-flex">
-                    <div class="grow shrink basis-0 text-slate-900 text-xs font-normal font-sans">${data.reporter}</div>
-                </div>
-            </div>
-
-             <div class=" flex-col justify-start items-start gap-1.5 flex">
-                <div class="self-stretch text-slate-900 text-xs font-normal font-sans">Priority:</div>
-                    <select id="sr-dialog-priority" name="sr-dialog-priority" class="mt-1 w-36 rounded border p-2  ">
+             <div class=" flex-col w-full justify-start items-start gap-1.5 flex">
+                <div class="self-stretch text-slate-900 text-sm font-normal font-sans">Priority:</div>
+                    <select id="sr-dialog-priority" name="sr-dialog-priority" class="mt-1 w-full rounded border p-2  ">
                        <option value="Highest">Highest</option>
                        <option value="High">High</option>
                       <option value="Medium">Medium</option>
                       <option value="Low">Low</option>
                    </select>
             </div>
-            <div class="self-stretch h-11 flex-col justify-start items-start gap-1.5 flex">
-                <div class="self-stretch text-slate-900 text-xs font-normal font-sans">Request Points:</div>
-                <div class="self-stretch px-3 py-2 bg-zinc-100 rounded-md shadow border border-zinc-300 justify-start items-center gap-8 inline-flex">
-                    <div class="w-24 text-slate-900 text-xs font-normal font-sans">7</div>
-                </div>
+              <div class=" flex-col w-full justify-start items-start gap-1.5 flex">
+                <div class="self-stretch text-slate-900 text-sm font-normal font-sans">Assignee</div>
+                    <select id="sr-dialog-assignee" name="sr-dialog-assignee" class="mt-1 w-full rounded border p-2  ">
+                       <option value="Test1">Test1</option>
+                       <option value="Test2">Test2</option>
+                      <option value="Test3">Test3</option>
+                   </select>
             </div>
-            <div class="flex-col justify-start items-start gap-1 flex">
-                <div class="text-zinc-500 text-xs font-normal font-sans">Created - ${data.createdAt} Days Ago</div>
-                <div class="text-zinc-500 text-xs font-normal font-sans">Updated - ${data.updatedAt} Days Ago</div>
-            </div>
+              <div class=" flex-col w-full justify-start items-start gap-1.5 flex">
+                <div class="self-stretch text-slate-900 text-sm font-normal font-sans">Points</div>
+                    <input type="number" class="w-full rounded-md h-8 border border-2"/>
+            </div> 
         </div>
     </div>
 </div>

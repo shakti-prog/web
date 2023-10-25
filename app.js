@@ -73,7 +73,20 @@ class DashboardScreen extends HTMLElement {
     const field = event.detail.message.field;
     const value = event.detail.message.value;
     const id = event.detail.message.id;
-    await updateSrField(id, field, value);
+    const response = await updateSrField(id, field, value);
+    if (response.status == 200) {
+      const data = await getSpecificSr(id);
+      dipatchEventForId(
+        id,
+        new CustomEvent("handleRender", {
+          bubbles: true,
+          cancelable: true,
+          detail: {
+            message: data,
+          },
+        })
+      );
+    }
   }
 
   async handleGetSrData(event) {
