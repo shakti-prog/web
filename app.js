@@ -5,6 +5,7 @@ import {
   updateSr,
   getSpecificSr,
   updateSrField,
+  applyFilters,
 } from "./Functions/service.js";
 import {
   RouterComponent,
@@ -55,6 +56,11 @@ class MainPage extends HTMLElement {
 class DashboardScreen extends HTMLElement {
   constructor() {
     super();
+    this.filters = {
+      priority: [],
+      assignee: [],
+      reporter: [],
+    };
   }
   connectedCallback() {
     this.addEventListener(
@@ -65,10 +71,71 @@ class DashboardScreen extends HTMLElement {
     this.addEventListener(
       customEvents.STATUS_CHANGE,
       this.handleStatusChange.bind(this)
-      
     );
     this.addEventListener("openSrModal", this.handleOpenSrDialog.bind(this));
     this.addEventListener("updateSrField", this.handleSrFieldChange.bind(this));
+    this.addEventListener("applyFilters", this.handleFilter.bind(this));
+  }
+
+  async handleFilter(event) {
+    const field = event.detail.message.field;
+    this.filters[field] = event.detail.message.data;
+    const { ToDo, InProgress, Done, Rejected, Accepted } = await applyFilters(
+      this.filters
+    );
+
+    dipatchEventForId(
+      "ToDo",
+      new CustomEvent(customEvents.RENDER_SR_DATA, {
+        bubbles: true,
+        cancelable: true,
+        detail: {
+          message: ToDo ? ToDo : [],
+        },
+      })
+    );
+    dipatchEventForId(
+      "InProgress",
+      new CustomEvent(customEvents.RENDER_SR_DATA, {
+        bubbles: true,
+        cancelable: true,
+        detail: {
+          message: InProgress ? InProgress : null,
+        },
+      })
+    );
+
+    dipatchEventForId(
+      "Done",
+      new CustomEvent(customEvents.RENDER_SR_DATA, {
+        bubbles: true,
+        cancelable: true,
+        detail: {
+          message: Done ? Done : null,
+        },
+      })
+    );
+    dipatchEventForId(
+      "Rejected",
+      new CustomEvent(customEvents.RENDER_SR_DATA, {
+        bubbles: true,
+        cancelable: true,
+        detail: {
+          message: Rejected ? Rejected : null,
+        },
+      })
+    );
+
+    dipatchEventForId(
+      "Accepted",
+      new CustomEvent(customEvents.RENDER_SR_DATA, {
+        bubbles: true,
+        cancelable: true,
+        detail: {
+          message: Accepted ? Accepted : [],
+        },
+      })
+    );
   }
 
   async handleSrFieldChange(event) {
@@ -197,4 +264,4 @@ customElements.define("sign-in-screen", SignInScreen);
 customElements.define("sign-in-component", SignIn);
 customElements.define("sr-form", srForm);
 customElements.define("sr-dialog", srDialog);
-customElements.define("multi-select",MultiSelect)
+customElements.define("multi-select", MultiSelect);

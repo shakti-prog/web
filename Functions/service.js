@@ -134,3 +134,30 @@ export async function updateSrField(id, field, value) {
   }
   
 }
+
+
+export async function applyFilters(filters) {
+  const obj = {
+    Filter:filters
+  }
+  const options = {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(obj),
+  };
+  try {
+    const response = await fetch(`${url}/filterSrData`, options);
+    const data = await response.json();
+    return data;
+  } catch (error) {
+    console.log(error);
+    return {
+      Error: error,
+    };
+  }
+    
+
+
+}

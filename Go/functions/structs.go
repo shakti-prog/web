@@ -42,3 +42,7 @@ type SrFieldUpdate struct{
 	 Field string `json:"field"`
 	 Value string `json:"value"`
 }
+
+type Filters struct{
+	Filter map[string][]string `json:"filter"`
+}

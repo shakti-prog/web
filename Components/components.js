@@ -219,9 +219,10 @@ class SwimlaneBody extends HTMLElement {
   }
   connectedCallback() {
     this.render();
-    document
-      .querySelector("#createSrButton")
-      .addEventListener("click", this.handleCreateSr.bind(this));
+    this.querySelector("#createSrButton").addEventListener(
+      "click",
+      this.handleCreateSr.bind(this)
+    );
   }
 
   handleCreateSr(event) {
@@ -272,7 +273,33 @@ class SwimlaneBody extends HTMLElement {
         </div>
     </div>
 </div>
-   
+     <div  class="grid grid-cols-3 gap-6">
+     <div>
+      <multi-select Name="Assignee" options=${JSON.stringify([
+        "Test1",
+        "Test2",
+        "Test3",
+      ])}>
+      </multi-select>
+      </div>
+      <div>
+       <multi-select Name="Reporter" options=${JSON.stringify([
+         "Test1",
+         "Test2",
+         "Test3",
+       ])}>
+      </multi-select>
+      </div>
+         <div>
+       <multi-select Name="Priority" options=${JSON.stringify([
+         "Highest",
+         "High",
+         "Medium",
+         "Low",
+       ])}>
+      </multi-select>
+      </div>
+     </div>
        <div style="width: 1180px; justify-content: flex-start; align-items: flex-start; gap: 12px; display: inline-flex; margin-Top:8px;">
          <swim-lane class="flex-1" title="ToDo" id="ToDo"></swim-lane>
        <swim-lane class="flex-1" title="InProgress" id="InProgress"></swim-lane>
@@ -730,50 +757,67 @@ class MultiSelect extends HTMLElement {
   constructor() {
     super();
   }
+
   connectedCallback() {
     this.render();
-    const selectButton = this.querySelector(".select-btn"),
-      items = this.querySelectorAll(".item");
+
+    const selectButton = this.querySelector(".select-btn");
+    const items = this.querySelectorAll(".item");
+
     selectButton.addEventListener("click", () => {
       selectButton.classList.toggle("open");
     });
+
     items.forEach((item) => {
       item.addEventListener("click", () => {
         item.classList.toggle("checked");
-        let checked = this.querySelectorAll(".checked"),
-          btnText = this.querySelector(".btn-text");
-        if (checked && checked.length > 0) {
-          let string = "";
-          checked.forEach((check) =>
-            string += check.innerText + ",")
-          btnText.innerText = string;
-         
-        } else {
-          btnText.innerText = "Select language";
-        }
+        this.updateButtonText();
       });
     });
   }
 
+  updateButtonText() {
+    const checkedItems = this.querySelectorAll(".checked");
+    const btnText = this.querySelector(".btn-text");
+    if (checkedItems && checkedItems.length > 0) {
+      let string = "";
+      const data = []
+      checkedItems.forEach((check) => (data.push(check.innerText),string += check.innerText + ", "));
+      btnText.innerText = string;
+      dipatchEventForId(
+        idConstants.DASHBOARD_SCREEN,
+        new CustomEvent("applyFilters", {
+          bubbles: true,
+          cancelable: true,
+          detail: {
+            message: {
+              field: this.getAttribute("Name").toLocaleLowerCase(),
+              data: data
+            }
+          }
+        })
+      );
+    } else {
+      btnText.innerText = `Select ${this.getAttribute("Name")} `;
+    }
+  }
+
   render() {
+    const options = JSON.parse(this.getAttribute("options"));
     this.innerHTML = `
-      <div class="container">
-        <div class="select-btn">
-            <span class="btn-text">Select language</span>
-        </div>
-        <ul class="list-items">
-           <li class="item">
-                 HTML and CSS
-           </li>
-           <li class="item">
-                 BootStrap
-           </li>
-           <li class="item">
-                 Javascript
-           </li>
-        </ul>
-      </div>
-      `;
+            <div class="container w-64 h-auto mx-auto py-4 flex flex-col lg:flex-row items-center">
+                <div class="select-btn border-b mb-2 pb-2 lg:mb-0 lg:mr-2">
+                    <span class="btn-text text-gray-700 max-w-36 h-auto">Select ${this.getAttribute(
+                      "Name"
+                    )}</span>
+                </div>
+                <ul class="list-items h-12 w-48 overflow-y-auto">
+                    ${options.map((option) => (
+                      `<li class="item py-2 border-b">${option}</li>`
+                    )).join("")}
+                </ul>
+            </div>
+        `;
   }
 }
 

@@ -41,7 +41,11 @@ func main() {
 	app.Get("/getSrData/:status",func(c *fiber.Ctx) error {
 		 return functions.GetSrDataForStatus(c,session)
 	})
-   
+    
+	app.Post("/filterSrData",func(c *fiber.Ctx) error {
+	    return functions.FilteredData(c,session)
+	})
+
 	app.Get("/getSpecificSrData/:id",func(c *fiber.Ctx) error {
 		return functions.GetSrDataForId(c,session);
 	})
