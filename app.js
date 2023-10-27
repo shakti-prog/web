@@ -82,7 +82,6 @@ class DashboardScreen extends HTMLElement {
   async handleFilter(event) {
     const field = event.detail.message.field;
     this.filters[field] = event.detail.message.data;
-    console.log(this.filters);
     const { ToDo, InProgress, Done, Rejected, Accepted } = await applyFilters(
       this.filters
     );
