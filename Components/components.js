@@ -70,7 +70,7 @@ class Card extends HTMLElement {
     this.innerHTML = `
    <div id=${
      this.cardDetails.id
-   } class="w-56 max-h-56 ml-2 mt-4 h-auto p-2.5 bg-white rounded-md border overflow-y-scroll ${
+   } class="w-56 h-64 max-h-64 ml-2 mt-4  p-2.5 bg-white rounded-md border overflow-y-scroll ${
       this.cardDetails.cardAttributes.borderColor
     } flex-col justify-start items-start gap-3 inline-flex">
   <div class="self-stretch justify-between items-center inline-flex">
@@ -112,11 +112,14 @@ class Card extends HTMLElement {
         <div class="text-center text-yellow-500 text-xs font-normal font-sans">Revamp</div>
     </div> 
 </div>
+  <div class="h-2">
+    <div class="border-t w-48 border-gray-300 my-4"></div>
+  <div> 
   <div class="self-stretch justify-between items-start inline-flex">
     <div class="text-zinc-500 text-xs font-normal opacity-60 ">${
       this.cardDetails.assignee
     }</div>
-    <div class="text-zinc-500 text-xs font-normal ">5 days ago</div>
+   
   </div>
 </div>
   
