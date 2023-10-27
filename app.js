@@ -21,7 +21,7 @@ import {
   srDialog,
   MultiSelect,
 } from "./Components/components.js";
-import { customEvents, idConstants } from "./constants/ID_EVENT_Constants.js";
+import { customEvents, idConstants } from "./constants/idConstants.js";
 
 class Router extends HTMLElement {
   constructor() {

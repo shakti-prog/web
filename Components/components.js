@@ -3,7 +3,7 @@ import {
   attributesForCard,
   svgForPriority,
 } from "../Functions/helper.js";
-import { customEvents, idConstants } from "../constants/ID_EVENT_Constants.js";
+import { customEvents, idConstants } from "../constants/idConstants.js";
 
 class Card extends HTMLElement {
   constructor() {
@@ -267,7 +267,7 @@ class SwimlaneBody extends HTMLElement {
               </div>
               <div class="ml-auto">
                 <button style="font-size:14px" id="createSrButton" class="bg-blue-500 hover:bg-blue-700 text-white py-1 px-2 ml-16  rounded">
-                  Create Sr
+                  Create SR
                  </button>
               </div>
              <div>
@@ -276,8 +276,8 @@ class SwimlaneBody extends HTMLElement {
         </div>
     </div>
 </div>
-     <div  class="grid grid-cols-5">
-     <div class="w-64">
+     <div  class="grid grid-cols-5 bg-gray-100 rounded-lg w-auto">
+     <div>
       <multi-select Name="Assignee" options=${JSON.stringify([
         "Test1",
         "Test2",
@@ -285,7 +285,7 @@ class SwimlaneBody extends HTMLElement {
       ])}>
       </multi-select>
       </div>
-      <div class="w-64">
+      <div>
        <multi-select Name="Reporter" options=${JSON.stringify([
          "Test1",
          "Test2",
@@ -293,7 +293,7 @@ class SwimlaneBody extends HTMLElement {
        ])}>
       </multi-select>
       </div>
-         <div class="w-64">
+         <div>
        <multi-select Name="Priority" options=${JSON.stringify([
          "Highest",
          "High",
@@ -302,7 +302,7 @@ class SwimlaneBody extends HTMLElement {
        ])}>
       </multi-select>
       </div>
-       <div class="w-64">
+       <div>
        <multi-select Name="Status" options=${JSON.stringify([
          "ToDo",
          "InProgress",
@@ -312,7 +312,7 @@ class SwimlaneBody extends HTMLElement {
        ])}>
       </multi-select>
       </div>
-       <div class="w-64">
+       <div >
        <multi-select Name="Type" options=${JSON.stringify([
          "Story",
          "Bug",
@@ -321,7 +321,7 @@ class SwimlaneBody extends HTMLElement {
       </multi-select>
       </div>
      </div>
-       <div style="width: 1180px; justify-content: flex-start; align-items: flex-start; gap: 12px; display: inline-flex; margin-Top:8px;">
+       <div style="width: 1180px; justify-content: flex-start; align-items: flex-start; gap: 12px; display: inline-flex; margin-Top:12px;">
          <swim-lane class="flex-1" title="ToDo" id="ToDo"></swim-lane>
        <swim-lane class="flex-1" title="InProgress" id="InProgress"></swim-lane>
        <swim-lane class="flex-1" title="Done" id="Done"></swim-lane>
@@ -843,7 +843,7 @@ class MultiSelect extends HTMLElement {
   render() {
     const options = JSON.parse(this.getAttribute("options"));
     this.innerHTML = `
-            <div class="container w-64 h-auto mx-auto py-4 flex flex-col lg:flex-row items-center bg-gray-100 rounded-lg">
+            <div class="container w-64 h-auto mx-auto py-4 flex flex-col lg:flex-row items-center">
                 <div class="select-btn  ml-2 mb-2 pb-2 lg:mb-0 lg:mr-2">
                     <span class="btn-text text-gray-700 max-w-36 h-auto">Select ${this.getAttribute(
                       "Name"
