@@ -61,7 +61,7 @@ class DashboardScreen extends HTMLElement {
       assignee: [],
       reporter: [],
       type: [],
-      status:[]
+      status: [],
     };
   }
   connectedCallback() {

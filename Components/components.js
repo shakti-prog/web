@@ -276,8 +276,8 @@ class SwimlaneBody extends HTMLElement {
         </div>
     </div>
 </div>
-     <div  class="grid grid-cols-5 gap-6">
-     <div>
+     <div  class="grid grid-cols-5">
+     <div class="w-64">
       <multi-select Name="Assignee" options=${JSON.stringify([
         "Test1",
         "Test2",
@@ -285,7 +285,7 @@ class SwimlaneBody extends HTMLElement {
       ])}>
       </multi-select>
       </div>
-      <div>
+      <div class="w-64">
        <multi-select Name="Reporter" options=${JSON.stringify([
          "Test1",
          "Test2",
@@ -293,7 +293,7 @@ class SwimlaneBody extends HTMLElement {
        ])}>
       </multi-select>
       </div>
-         <div>
+         <div class="w-64">
        <multi-select Name="Priority" options=${JSON.stringify([
          "Highest",
          "High",
@@ -302,7 +302,7 @@ class SwimlaneBody extends HTMLElement {
        ])}>
       </multi-select>
       </div>
-       <div>
+       <div class="w-64">
        <multi-select Name="Status" options=${JSON.stringify([
          "ToDo",
          "InProgress",
@@ -312,7 +312,7 @@ class SwimlaneBody extends HTMLElement {
        ])}>
       </multi-select>
       </div>
-       <div>
+       <div class="w-64">
        <multi-select Name="Type" options=${JSON.stringify([
          "Story",
          "Bug",
@@ -851,10 +851,7 @@ class MultiSelect extends HTMLElement {
                 </div>
                 <ul class="list-items h-12 w-48 overflow-y-auto">
                     ${options
-                      .map(
-                        (option) =>
-                          `<li class="item py-2 ">${option}</li>`
-                      )
+                      .map((option) => `<li class="item py-2 ">${option}</li>`)
                       .join("")}
                 </ul>
             </div>
