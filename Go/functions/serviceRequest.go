@@ -146,6 +146,8 @@ func FilteredData(c *fiber.Ctx,session *gocql.Session) error{
     assigneeFilterValues := filter.Filter["assignee"];
 	reporterFilterValues := filter.Filter["reporter"];
 	priorityFilterValues := filter.Filter["priority"];
+	statusFilterValues := filter.Filter["status"];
+	typeFilterValues := filter.Filter["type"];
 	queryString :="Select no,description,title,Type,status,reporter,assignee,priority,createdAt,updatedAt from serviceRequest  ";
 	queryString += " ";
 	filterString := "";
@@ -189,6 +191,37 @@ func FilteredData(c *fiber.Ctx,session *gocql.Session) error{
 	   }
 	   filterString += ")"
 	}
+    if(len(statusFilterValues) != 0){
+		if len(filterString) == 0{
+			filterString += " Where status in ("
+		 } else{
+             filterString += " And status in ("
+		 }
+       
+	   for index,value := range statusFilterValues{
+		 filterString += "'"+value + "'";
+		 if index != len(statusFilterValues)-1{
+			filterString += ","
+		 }
+	   }
+	   filterString += ")"
+	}
+	if(len(typeFilterValues) != 0){
+		if len(filterString) == 0{
+			filterString += " Where type in ("
+		 } else{
+             filterString += " And type in ("
+		 }
+       
+	   for index,value := range typeFilterValues{
+		 filterString += "'"+value + "'";
+		 if index != len(typeFilterValues)-1{
+			filterString += ","
+		 }
+	   }
+	   filterString += ")"
+	}
+
 	if len(filterString) != 0{
 		queryString += filterString
 	}

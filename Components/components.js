@@ -273,7 +273,7 @@ class SwimlaneBody extends HTMLElement {
         </div>
     </div>
 </div>
-     <div  class="grid grid-cols-3 gap-6">
+     <div  class="grid grid-cols-5 gap-6">
      <div>
       <multi-select Name="Assignee" options=${JSON.stringify([
         "Test1",
@@ -296,6 +296,24 @@ class SwimlaneBody extends HTMLElement {
          "High",
          "Medium",
          "Low",
+       ])}>
+      </multi-select>
+      </div>
+       <div>
+       <multi-select Name="Status" options=${JSON.stringify([
+         "ToDo",
+         "InProgress",
+         "Done",
+         "Rejected",
+         "Accepted",
+       ])}>
+      </multi-select>
+      </div>
+       <div>
+       <multi-select Name="Type" options=${JSON.stringify([
+         "Story",
+         "Bug",
+         "Task",
        ])}>
       </multi-select>
       </div>
@@ -781,8 +799,12 @@ class MultiSelect extends HTMLElement {
     const btnText = this.querySelector(".btn-text");
     if (checkedItems && checkedItems.length > 0) {
       let string = "";
-      const data = []
-      checkedItems.forEach((check) => (data.push(check.innerText),string += check.innerText + ", "));
+      const data = [];
+      checkedItems.forEach(
+        (check) => (
+          data.push(check.innerText), (string += check.innerText + ", ")
+        )
+      );
       btnText.innerText = string;
       dipatchEventForId(
         idConstants.DASHBOARD_SCREEN,
@@ -792,12 +814,25 @@ class MultiSelect extends HTMLElement {
           detail: {
             message: {
               field: this.getAttribute("Name").toLocaleLowerCase(),
-              data: data
-            }
-          }
+              data: data,
+            },
+          },
         })
       );
     } else {
+      dipatchEventForId(
+        idConstants.DASHBOARD_SCREEN,
+        new CustomEvent("applyFilters", {
+          bubbles: true,
+          cancelable: true,
+          detail: {
+            message: {
+              field: this.getAttribute("Name").toLocaleLowerCase(),
+              data: [],
+            },
+          },
+        })
+      );
       btnText.innerText = `Select ${this.getAttribute("Name")} `;
     }
   }
@@ -812,9 +847,12 @@ class MultiSelect extends HTMLElement {
                     )}</span>
                 </div>
                 <ul class="list-items h-12 w-48 overflow-y-auto">
-                    ${options.map((option) => (
-                      `<li class="item py-2 border-b">${option}</li>`
-                    )).join("")}
+                    ${options
+                      .map(
+                        (option) =>
+                          `<li class="item py-2 border-b">${option}</li>`
+                      )
+                      .join("")}
                 </ul>
             </div>
         `;
