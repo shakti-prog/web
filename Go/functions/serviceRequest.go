@@ -136,6 +136,8 @@ func GetSrDataForId(c *fiber.Ctx, session *gocql.Session) error {
 
 }
 
+//Function for filtering data when filters are added in the front end
+
 func FilteredData(c *fiber.Ctx,session *gocql.Session) error{
 	filter := new(Filters);
 	err := c.BodyParser(filter);
