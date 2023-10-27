@@ -70,7 +70,7 @@ class Card extends HTMLElement {
     this.innerHTML = `
    <div id=${
      this.cardDetails.id
-   } class="w-56 h-64 max-h-64 ml-2 mt-4  p-2.5 bg-white rounded-md border overflow-y-scroll ${
+   } class="w-56 h-56 max-h-56 ml-2 mt-4  p-2.5 bg-white rounded-md border overflow-y-scroll ${
       this.cardDetails.cardAttributes.borderColor
     } flex-col justify-start items-start gap-3 inline-flex">
   <div class="self-stretch justify-between items-center inline-flex">
@@ -103,16 +103,17 @@ class Card extends HTMLElement {
   </div>
  <div class="self-stretch justify-start items-start gap-1.5 flex flex-wrap">
     <div class="px-1.5 py-1 bg-red-100 rounded justify-center items-center gap-1.5 flex">
-        <div class="text-center text-red-700 text-xs font-normal font-sans">Admin Console</div>
+       <div class="text-center text-red-700 text-xs font-normal font-sans" style="font-size: 10px;">Admin Console</div>
+
     </div>
     <div class="px-1.5 py-1 bg-indigo-50 rounded justify-center items-center gap-1.5 flex">
-        <div class="text-center text-blue-500 text-xs font-normal font-sans">Logistics</div>
+        <div class="text-center text-blue-500 text-xs font-normal font-sans" style="font-size: 10px;">Logistics</div>
     </div>
     <div class="px-1.5 py-1 bg-yellow-50 rounded justify-center items-center gap-1.5 flex">
-        <div class="text-center text-yellow-500 text-xs font-normal font-sans">Revamp</div>
+        <div class="text-center text-yellow-500 text-xs font-normal font-sans" style="font-size: 10px;">Revamp</div>
     </div> 
 </div>
-  <div class="h-2">
+  <div class="h-1">
     <div class="border-t w-48 border-gray-300 my-4"></div>
   <div> 
   <div class="self-stretch justify-between items-start inline-flex">
@@ -122,7 +123,6 @@ class Card extends HTMLElement {
    
   </div>
 </div>
-  
 `;
   }
 }
@@ -259,11 +259,11 @@ class SwimlaneBody extends HTMLElement {
                 <div class="text-zinc-500 text-xs font-normal font-['Gilroy-SemiBold']">/</div>
                 <div class="text-zinc-500 text-xs font-normal font-['Gilroy-SemiBold']">Source One</div>
                 <div class="text-zinc-500 text-xs font-normal font-['Gilroy-SemiBold']">/</div>
-                <div class="text-zinc-500 text-xs font-normal font-['Gilroy-SemiBold']">SRCO Board</div>
+                <div class="text-zinc-500 text-xs font-normal font-['Gilroy-SemiBold']">Task Board</div>
             </div>
             <div class="flex justify-between items-center">
                <div class="text-slate-900 text-xl font-normal font-bold ">
-                    SRCO Sprint 115
+                    Task Management Board
               </div>
               <div class="ml-auto">
                 <button style="font-size:14px" id="createSrButton" class="bg-blue-500 hover:bg-blue-700 text-white py-1 px-2 ml-16  rounded">
@@ -843,8 +843,8 @@ class MultiSelect extends HTMLElement {
   render() {
     const options = JSON.parse(this.getAttribute("options"));
     this.innerHTML = `
-            <div class="container w-64 h-auto mx-auto py-4 flex flex-col lg:flex-row items-center">
-                <div class="select-btn border-b mb-2 pb-2 lg:mb-0 lg:mr-2">
+            <div class="container w-64 h-auto mx-auto py-4 flex flex-col lg:flex-row items-center bg-gray-100 rounded-lg">
+                <div class="select-btn  ml-2 mb-2 pb-2 lg:mb-0 lg:mr-2">
                     <span class="btn-text text-gray-700 max-w-36 h-auto">Select ${this.getAttribute(
                       "Name"
                     )}</span>
@@ -853,7 +853,7 @@ class MultiSelect extends HTMLElement {
                     ${options
                       .map(
                         (option) =>
-                          `<li class="item py-2 border-b">${option}</li>`
+                          `<li class="item py-2 ">${option}</li>`
                       )
                       .join("")}
                 </ul>
