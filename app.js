@@ -20,6 +20,7 @@ import {
   srForm,
   srDialog,
   MultiSelect,
+  CommentSection,
 } from "./Components/components.js";
 import { customEvents, idConstants } from "./constants/idConstants.js";
 
@@ -156,6 +157,17 @@ class DashboardScreen extends HTMLElement {
           },
         })
       );
+      if (field == "comments") {
+        this.querySelector("#sr-comment-section").dispatchEvent(
+          new CustomEvent("getComments", {
+            bubbles: true,
+            cancelable: true,
+            detail: {
+              message: data.comments,
+            },
+          })
+        );
+      }
     }
   }
 
@@ -220,13 +232,21 @@ class DashboardScreen extends HTMLElement {
   async handleOpenSrDialog(event) {
     const id = event.detail.message;
     const data = await getSpecificSr(id);
-    dipatchEventForId(
-      "sr-dialog",
+    this.querySelector("#sr-dialog").dispatchEvent(
       new CustomEvent("openSrDialog", {
         bubbles: true,
         cancelable: true,
         detail: {
           message: data,
+        },
+      })
+    );
+    this.querySelector("#sr-comment-section").dispatchEvent(
+      new CustomEvent("getComments", {
+        bubbles: true,
+        cancelable: true,
+        detail: {
+          message: data.comments,
         },
       })
     );
@@ -266,3 +286,4 @@ customElements.define("sign-in-component", SignIn);
 customElements.define("sr-form", srForm);
 customElements.define("sr-dialog", srDialog);
 customElements.define("multi-select", MultiSelect);
+customElements.define("sr-comment", CommentSection);

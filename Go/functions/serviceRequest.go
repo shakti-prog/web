@@ -6,7 +6,6 @@ import (
 	"strconv"
 	"strings"
 	"time"
-
 	"github.com/gocql/gocql"
 	"github.com/gofiber/fiber/v2"
 )
@@ -65,7 +64,10 @@ func UpdateSr(c *fiber.Ctx, session *gocql.Session) error {
 	}
 	field := p.Field;
 	value := p.Value;
-	query := session.Query("Update servicerequest set " + field + " = ?  where no = ?", value, no)
+	query := session.Query("Update servicerequest set " + field + " = ?  where no = ?", value, no);
+	if field == "comments"{
+		query = session.Query("Update servicerequest set " + field + " = " + field + " + "+ " [ " + "'" +value+"'"+ " ] " + " where no = ?",no);
+	}
 	if err := query.Exec(); err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"Err": "Could not update SR"})
 	}
@@ -105,7 +107,7 @@ func GetSrDataForId(c *fiber.Ctx, session *gocql.Session) error {
 	if err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"Error": "Invalid Id"})
 	}
-	query := session.Query("Select no,description,title,Type,status,reporter,assignee,priority,createdAt,updatedAt from serviceRequest where no = ? ALLOW FILTERING", id)
+	query := session.Query("Select no,description,title,Type,status,reporter,assignee,priority,createdAt,updatedAt,comments from serviceRequest where no = ? ALLOW FILTERING", id)
 	var no int64
 	var description string
 	var title string
@@ -116,11 +118,11 @@ func GetSrDataForId(c *fiber.Ctx, session *gocql.Session) error {
 	var priority string
 	var createdAt time.Time
 	var updatedAt time.Time
-	err = query.Scan(&no, &description, &title, &Type, &status, &reporter, &assignee, &priority, &createdAt, &updatedAt)
+	var comments []string
+	err = query.Scan(&no, &description, &title, &Type, &status, &reporter, &assignee, &priority, &createdAt, &updatedAt,&comments)
 	if err != nil {
 		return c.Status(fiber.StatusBadGateway).JSON(fiber.Map{"Error": "No such card exists"})
 	}
-
 	return c.Status(fiber.StatusOK).JSON(fiber.Map{
 		"no":          no,
 		"description": description,
@@ -132,6 +134,7 @@ func GetSrDataForId(c *fiber.Ctx, session *gocql.Session) error {
 		"priority":    priority,
 		"createdAt":   getNumberOfDays(createdAt),
 		"updatedAt":   getNumberOfDays(updatedAt),
+		"comments" : reverseArray(comments),
 	})
 
 }

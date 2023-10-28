@@ -62,7 +62,7 @@ function storeLoginDetails(response) {
   const responseData = response.responseData;
   const name = responseData.name;
   const token = responseData.token;
-  const expirationTimeInMinutes = 1;
+  const expirationTimeInMinutes = 60;
   localStorage.setItem("name", name);
   localStorage.setItem("token", token);
   setTimeout(() => {

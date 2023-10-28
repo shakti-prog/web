@@ -560,6 +560,7 @@ class srDialog extends HTMLElement {
   constructor() {
     super();
     this.data = null;
+    this.comment = "";
   }
   connectedCallback() {
     this.addEventListener("openSrDialog", this.handleDialogBox.bind(this));
@@ -591,7 +592,41 @@ class srDialog extends HTMLElement {
       "change",
       this.handleReporterChange.bind(this)
     );
+    this.querySelector("#sr-dialog-comment").addEventListener(
+      "change",
+      this.handleSrCommentChange.bind(this)
+    );
+    this.querySelector("#sr-dialog-submit-button").addEventListener(
+      "click",
+      this.handleSubmitComment.bind(this)
+    );
     this.querySelector("#sr-details-dialog").showModal();
+  }
+
+  handleSrCommentChange(event) {
+    this.comment = event.target.value;
+  }
+
+  handleSubmitComment(event) {
+    if (this.comment.trim().length == 0) {
+      return alert("Empty comments not allowed");
+    }
+    dipatchEventForId(
+      idConstants.DASHBOARD_SCREEN,
+      new CustomEvent("updateSrField", {
+        bubbles: true,
+        cancelable: true,
+        detail: {
+          message: {
+            field: "comments",
+            value: this.comment,
+            id: this.data.no,
+          }
+},
+      })
+    );
+    this.comment = "";
+    this.querySelector("#sr-dialog-comment").value = "";
   }
 
   handleStatusChange(event) {
@@ -704,7 +739,7 @@ class srDialog extends HTMLElement {
                 </div>
             </div>
         </div>
-        <div class="justify-start items-center gap-2.5 inline-flex">
+        <div class="justify-start items-center gap-2.5 inline-flex mt-4">
             <div class="text-slate-900 text-xs font-normal font-sans">Show Activity:</div>
             <div class="justify-start items-start gap-1.5 flex">
                 <div class="px-3 py-1 bg-blue-500 rounded justify-center items-center gap-1 flex">
@@ -713,13 +748,21 @@ class srDialog extends HTMLElement {
                 <div class="px-3 py-1 bg-white rounded shadow border border-zinc-300 justify-center items-center gap-1 flex">
                     <div class="text-zinc-500 text-xs font-normal font-sans">Comment</div>
                 </div>
-                <div class="px-3 py-1 bg-white rounded shadow border border-zinc-300 justify-center items-center gap-1 flex">
-                    <div class="text-zinc-500 text-xs font-normal font-sans">History</div>
-                </div>
-                <div class="px-3 py-1 bg-white rounded shadow border border-zinc-300 justify-center items-center gap-1 flex">
-                    <div class="text-zinc-500 text-xs font-normal font-sans">Work Log</div>
-                </div>
             </div>
+        </div>
+        <div class="mt-4 flex items-center gap-2 w-full">
+            <input 
+            class="border border-zinc-300 w-full rounded px-2 py-1 placeholder-zinc-500 text-sm focus:outline-none focus:border-blue-500"
+            id="sr-dialog-comment"
+            type="text"
+            placeholder="Add a comment"/>
+             <button id="sr-dialog-submit-button" class="bg-blue-500 hover:bg-blue-600 w-32 text-white font-semibold px-1 h-8 rounded focus:outline-none text-sm">
+                 Submit
+             </button>      
+        </div>
+        <div class="w-full"> 
+         <sr-comment id="sr-comment-section">
+          </sr-comment>
         </div>
     </div>
     <div class="flex-col justify-start w-1/3 h-auto items-start gap-3 inline-flex">
@@ -858,4 +901,49 @@ class MultiSelect extends HTMLElement {
   }
 }
 
-export { Card, Swimlane, SwimlaneBody, SignIn, srForm, srDialog, MultiSelect };
+class CommentSection extends HTMLElement {
+  constructor() {
+    super();
+    this.comments = [];
+  }
+  connectedCallback() {
+    this.addEventListener("getComments", this.handleGetComments.bind(this));
+  }
+
+  handleGetComments(event) {
+    const commentData = event.detail.message;
+    console.log(commentData);
+    if (!commentData) {
+      this.comments = [];
+    } else {
+      this.comments = commentData;
+    }
+    this.render(this.comments);
+  }
+
+  render() {
+    this.innerHTML = `
+    <div class="mt-4">
+    ${this.comments
+      .map(
+        (comment) =>
+          `  <div class="bg-gray-100 p-3 mt-2 rounded-md shadow-sm w-full ">
+                 <p class="text-sm text-gray-700">${comment}</p>
+            </div>`
+      )
+      .join(" ")}
+    </div>
+    `;
+  }
+}
+
+export {
+  Card,
+  Swimlane,
+  SwimlaneBody,
+  SignIn,
+  srForm,
+  srDialog,
+  MultiSelect,
+  CommentSection,
+};
