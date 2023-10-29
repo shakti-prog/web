@@ -49,6 +49,14 @@ func main() {
 	app.Get("/getSpecificSrData/:id",func(c *fiber.Ctx) error {
 		return functions.GetSrDataForId(c,session);
 	})
+
+	app.Post("/createWorkSpace/:name",func(c *fiber.Ctx) error {
+		return functions.CreateWorkSpace(c,session)
+	})
+
+	app.Get("/getAllWorkSpaces",func(c *fiber.Ctx) error {
+		return functions.GetAllWorkSpaces(c,session);
+	})
 	
 	err := app.Listen(":9000")
 	if err != nil {

@@ -6,6 +6,7 @@ import (
 	"strconv"
 	"strings"
 	"time"
+
 	"github.com/gocql/gocql"
 	"github.com/gofiber/fiber/v2"
 )
@@ -278,6 +279,38 @@ func FilteredData(c *fiber.Ctx,session *gocql.Session) error{
 	})
 
 	return c.Status(fiber.StatusOK).JSON(fiber.Map{"ToDo":ToDodata,"InProgress":InProgress,"Done":Done,"Rejected":Rejected,"Accepted":Accepted})
+
+}
+
+func CreateWorkSpace(c *fiber.Ctx,session *gocql.Session) error{
+	projectName := c.Params("name");
+
+	query := session.Query(
+		"INSERT INTO project (project_name,project_id) VALUES (?,uuid())",projectName,
+	)
+	if err := query.Exec(); err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"Err": "Could not Project"})
+	}
+
+	return c.Status(fiber.StatusOK).JSON(fiber.Map{"Message": "Project Successfully created"})
+}
+
+func GetAllWorkSpaces(c *fiber.Ctx,session *gocql.Session) error{
+	query := session.Query("Select project_name from project");
+	var workspaces []string;
+	scanner := query.Iter().Scanner();
+	for scanner.Next(){
+      var workspace string;
+      err := scanner.Scan(&workspace);
+	  if err != nil{
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"Err": "Something went wrong"})
+	  }
+	  workspaces = append(workspaces, workspace)
+	}
+    
+	return c.Status(fiber.StatusOK).JSON(fiber.Map{"Data":workspaces})
+    
+
 
 }
 

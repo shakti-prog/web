@@ -226,6 +226,18 @@ class SwimlaneBody extends HTMLElement {
       "click",
       this.handleCreateSr.bind(this)
     );
+    this.querySelector("#work-space-create-button").addEventListener(
+      "click",
+      this.handleCreateProject.bind(this)
+    );
+    dipatchEventForId(
+      idConstants.DASHBOARD_SCREEN,
+      new CustomEvent("getProjectOptions", {
+        bubbles: true,
+        cancelable: true,
+      })
+    );
+
   }
 
   handleCreateSr(event) {
@@ -237,11 +249,19 @@ class SwimlaneBody extends HTMLElement {
       })
     );
   }
+  handleCreateProject(event) {
+    document
+      .getElementById("project-dialog-box")
+      .dispatchEvent(new CustomEvent("openProjectDialog", {
+        bubbles: true,
+        cancelable:true
+      }));
+  }
 
   render() {
     this.innerHTML = `
     <div class="ml-32">
-    <div class="w-96 h-32 flex-col justify-start items-start gap-3.5 inline-flex mt-12">
+    <div class="w-auto h-32 flex-col justify-start items-start gap-3.5 inline-flex mt-12">
     <div class="bg-white justify-start items-start gap-5 inline-flex">
         <div class="flex-col justify-start items-start gap-1.5 inline-flex">
             <div class="text-slate-900 text-sm font-normal font-['Gilroy-SemiBold']">Active Sprints</div>
@@ -251,6 +271,10 @@ class SwimlaneBody extends HTMLElement {
             <div class="text-zinc-500 text-sm font-normal font-['Gilroy-Medium']">Backlog</div>
             <div class="self-stretch h-px opacity-0 border border-zinc-500"></div>
         </div>
+          <div class="flex ml-8">
+    <button id="work-space-create-button" class="rounded bg-blue-500 px-2 py-1 text-sm font-semibold text-white hover:bg-blue-700">Add workspace</button>
+    <work-space-select id="work-space-select"> </work-space-select>
+  </div>
     </div>
     <div class="w-96 h-10 relative">
         <div class="left-0 top-0 absolute flex-col justify-start items-start gap-1 inline-flex">
@@ -621,8 +645,8 @@ class srDialog extends HTMLElement {
             field: "comments",
             value: this.comment,
             id: this.data.no,
-          }
-},
+          },
+        },
       })
     );
     this.comment = "";
@@ -937,6 +961,97 @@ class CommentSection extends HTMLElement {
   }
 }
 
+class ProjectDialog extends HTMLElement {
+  constructor() {
+    super();
+    this.title = "";
+  }
+  connectedCallback(){
+    this.addEventListener("openProjectDialog", this.handleOpenProjectDialog.bind(this));
+  }
+
+  handleOpenProjectDialog(event) {
+    this.render();
+    this.querySelector("#project-title").addEventListener(
+      "change",
+      this.handleTitleChange.bind(this)
+    );
+    this.querySelector("#project-button").addEventListener(
+      "click",
+      this.handleCreateProjectButton.bind(this)
+    );
+    this.querySelector("#project-dialog").showModal();
+  }
+
+  handleTitleChange(event) {
+    this.title = event.target.value;
+  }
+
+  handleCreateProjectButton(event) {
+    dipatchEventForId(
+      idConstants.DASHBOARD_SCREEN,
+      new CustomEvent("create-project", {
+        bubbles: true,
+        cancelable: true,
+        detail: {
+          message: this.title,
+        },
+      })
+    );
+    this.querySelector("#project-dialog").close();
+    dipatchEventForId(
+      idConstants.DASHBOARD_SCREEN,
+      new CustomEvent("getProjectOptions", {
+        bubbles: true,
+        cancelable:true
+      })
+    );
+  }
+
+  render() {
+    this.innerHTML = `
+       <dialog id="project-dialog" class="w-1/5 h-1/5 rounded-lg">
+         <div class="mt-4">
+              <label for="type" class="block text-sm font-medium text-gray-700">Project Title</label>
+              <input id="project-title" class="h-10 w-full mt-4 border-collapse rounded-lg border" />
+            <button type="button" id="project-button" class="inline-flex w-full justify-center rounded-md bg-blue-600 px-2 py-1 text-sm font-semibold text-white shadow-sm hover:bg-blue-700 mt-2 sm:ml-1 sm:w-auto">Submit</button>
+        </div>
+       </dialog>
+
+      `;
+  }
+}
+
+
+class WorkSpaceSelect extends HTMLElement{
+  constructor() {
+    super();
+    this.options = [];
+  }
+  
+  connectedCallback() {
+    this.render();
+    this.addEventListener('renderProjectOptions', this.handleProjectOptions.bind(this));
+  }
+
+  handleProjectOptions(event) {
+    this.options = event.detail.message.Data;
+    this.render();
+ }
+
+  render() {
+    this.innerHTML = `
+     <select class="text-sm font-semibold text-slate-900 ml-4">
+          ${this.options.map((option) => (
+             ` <option value=${option}>${option}</option>`
+          ))}
+    </select>`;
+
+  }
+
+
+}
+
 export {
   Card,
   Swimlane,
@@ -946,4 +1061,6 @@ export {
   srDialog,
   MultiSelect,
   CommentSection,
+  WorkSpaceSelect,
+  ProjectDialog
 };

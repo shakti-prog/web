@@ -161,3 +161,34 @@ export async function applyFilters(filters) {
 
 
 }
+
+
+export async function createProject(title) {
+  const options = {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+  };
+  try {
+    const response = await fetch(`${url}/createWorkSpace/${title}`,options);
+    return response; 
+    
+  }
+  catch (error) {
+    console.log(error);
+    return {
+      Error: error,
+    };
+    
+  }
+  
+}
+
+export async function getAllProjects() {
+  const response = await fetch(`${url}/getAllWorkSpaces`);
+  const data = await response.json();
+  return data;
+
+ 
+}

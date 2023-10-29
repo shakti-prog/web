@@ -6,6 +6,8 @@ import {
   getSpecificSr,
   updateSrField,
   applyFilters,
+  createProject,
+  getAllProjects,
 } from "./Functions/service.js";
 import {
   RouterComponent,
@@ -21,6 +23,8 @@ import {
   srDialog,
   MultiSelect,
   CommentSection,
+  WorkSpaceSelect,
+  ProjectDialog,
 } from "./Components/components.js";
 import { customEvents, idConstants } from "./constants/idConstants.js";
 
@@ -78,6 +82,28 @@ class DashboardScreen extends HTMLElement {
     this.addEventListener("openSrModal", this.handleOpenSrDialog.bind(this));
     this.addEventListener("updateSrField", this.handleSrFieldChange.bind(this));
     this.addEventListener("applyFilters", this.handleFilter.bind(this));
+    this.addEventListener("create-project", this.handleCreateProject.bind(this));
+    this.addEventListener('getProjectOptions', this.handleGetProjects.bind(this));
+  }
+
+  async handleCreateProject(event) {
+    const response = await createProject(event.detail.message);
+    if (response.status == 200) {
+      alert("Project Created successfully");
+    } 
+  }
+  async handleGetProjects(event) {
+       const data = await getAllProjects();
+       this.querySelector("#work-space-select").dispatchEvent(
+         new CustomEvent("renderProjectOptions", {
+           bubbles: true,
+           cancelable: true,
+           detail: {
+             message: data,
+           },
+         })
+       );
+    
   }
 
   async handleFilter(event) {
@@ -287,3 +313,5 @@ customElements.define("sr-form", srForm);
 customElements.define("sr-dialog", srDialog);
 customElements.define("multi-select", MultiSelect);
 customElements.define("sr-comment", CommentSection);
+customElements.define("work-space-select", WorkSpaceSelect);
+customElements.define("project-dialog",ProjectDialog)

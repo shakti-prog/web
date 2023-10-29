@@ -21,9 +21,12 @@ export function RouterComponent(hash) {
                  <dashboard-screen id="dashboard-screen">
                      <swim-lanebody id="swim-lane-body">
                      </swim-lanebody>
-                      <sr-dialog id="sr-dialog"></sr-dialog>
+                      <sr-dialog id="sr-dialog">
+                      </sr-dialog>
                       <sr-form id="sr-form">   
                       </sr-form>
+                      <project-dialog id="project-dialog-box">
+                      </project-dialog>
                 </dashboard-screen>
             </main-page>`;
       }
