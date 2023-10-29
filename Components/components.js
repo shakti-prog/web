@@ -139,6 +139,13 @@ class Swimlane extends HTMLElement {
     );
     this.addEventListener("dragover", this.allowDrop.bind(this));
     this.addEventListener("drop", this.drop.bind(this));
+    this.addEventListener(
+      "workSpaceChanged",
+      this.handleWorkSpaceChange.bind(this)
+    );
+  }
+
+  handleWorkSpaceChange(event) {
     dipatchEventForId(
       idConstants.DASHBOARD_SCREEN,
       new CustomEvent(customEvents.GET_DATA_FOR_SWIMLANE, {
@@ -237,7 +244,6 @@ class SwimlaneBody extends HTMLElement {
         cancelable: true,
       })
     );
-
   }
 
   handleCreateSr(event) {
@@ -250,12 +256,12 @@ class SwimlaneBody extends HTMLElement {
     );
   }
   handleCreateProject(event) {
-    document
-      .getElementById("project-dialog-box")
-      .dispatchEvent(new CustomEvent("openProjectDialog", {
+    document.getElementById("project-dialog-box").dispatchEvent(
+      new CustomEvent("openProjectDialog", {
         bubbles: true,
-        cancelable:true
-      }));
+        cancelable: true,
+      })
+    );
   }
 
   render() {
@@ -966,8 +972,11 @@ class ProjectDialog extends HTMLElement {
     super();
     this.title = "";
   }
-  connectedCallback(){
-    this.addEventListener("openProjectDialog", this.handleOpenProjectDialog.bind(this));
+  connectedCallback() {
+    this.addEventListener(
+      "openProjectDialog",
+      this.handleOpenProjectDialog.bind(this)
+    );
   }
 
   handleOpenProjectDialog(event) {
@@ -1003,7 +1012,7 @@ class ProjectDialog extends HTMLElement {
       idConstants.DASHBOARD_SCREEN,
       new CustomEvent("getProjectOptions", {
         bubbles: true,
-        cancelable:true
+        cancelable: true,
       })
     );
   }
@@ -1022,34 +1031,49 @@ class ProjectDialog extends HTMLElement {
   }
 }
 
-
-class WorkSpaceSelect extends HTMLElement{
+class WorkSpaceSelect extends HTMLElement {
   constructor() {
     super();
     this.options = [];
   }
-  
+
   connectedCallback() {
     this.render();
-    this.addEventListener('renderProjectOptions', this.handleProjectOptions.bind(this));
+    this.addEventListener(
+      "renderProjectOptions",
+      this.handleProjectOptions.bind(this)
+    );
+    this.addEventListener("change", this.handleChange.bind(this));
   }
 
   handleProjectOptions(event) {
     this.options = event.detail.message.Data;
     this.render();
- }
+  }
 
-  render() {
-    this.innerHTML = `
-     <select class="text-sm font-semibold text-slate-900 ml-4">
-          ${this.options.map((option) => (
-             ` <option value=${option}>${option}</option>`
-          ))}
-    </select>`;
+  handleChange(event) {
+    const value = event.target.value;
+    dipatchEventForId(
+      idConstants.DASHBOARD_SCREEN,
+      new CustomEvent("changeProject", {
+        bubbles: true,
+        cancelable: true,
+        detail: {
+          message:value
+        }
+      })
+    );
 
   }
 
-
+  render() {
+    this.innerHTML = `
+     <select id="work-space-select" class="text-sm font-semibold text-slate-900 ml-4">
+          ${this.options.map(
+            (option) => ` <option value=${option}>${option}</option>`
+          )}
+    </select>`;
+  }
 }
 
 export {
@@ -1062,5 +1086,5 @@ export {
   MultiSelect,
   CommentSection,
   WorkSpaceSelect,
-  ProjectDialog
+  ProjectDialog,
 };

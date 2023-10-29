@@ -16,6 +16,7 @@ type serviceRequest struct {
 	Reporter    string `json:"reporter"`
 	Priority    string `json:"priority"`
 	Title       string `json:"title"`
+	Project     string `json:"project_name"`
 }
 
 

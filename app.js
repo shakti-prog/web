@@ -68,6 +68,7 @@ class DashboardScreen extends HTMLElement {
       type: [],
       status: [],
     };
+    this.project = "";
   }
   connectedCallback() {
     this.addEventListener(
@@ -82,35 +83,75 @@ class DashboardScreen extends HTMLElement {
     this.addEventListener("openSrModal", this.handleOpenSrDialog.bind(this));
     this.addEventListener("updateSrField", this.handleSrFieldChange.bind(this));
     this.addEventListener("applyFilters", this.handleFilter.bind(this));
-    this.addEventListener("create-project", this.handleCreateProject.bind(this));
-    this.addEventListener('getProjectOptions', this.handleGetProjects.bind(this));
+    this.addEventListener(
+      "create-project",
+      this.handleCreateProject.bind(this)
+    );
+    this.addEventListener(
+      "getProjectOptions",
+      this.handleGetProjects.bind(this)
+    );
+    this.addEventListener("changeProject", this.handleChangeProject.bind(this));
+  }
+
+  handleChangeProject(event) {
+    this.project = event.detail.message;
+    this.querySelector("#ToDo").dispatchEvent(
+      new CustomEvent("workSpaceChanged", {
+        bubbles: true,
+        cancelable: true,
+      })
+    );
+    this.querySelector("#InProgress").dispatchEvent(
+      new CustomEvent("workSpaceChanged", {
+        bubbles: true,
+        cancelable: true,
+      })
+    );
+    this.querySelector("#Done").dispatchEvent(
+      new CustomEvent("workSpaceChanged", {
+        bubbles: true,
+        cancelable: true,
+      })
+    );
+    this.querySelector("#Rejected").dispatchEvent(
+      new CustomEvent("workSpaceChanged", {
+        bubbles: true,
+        cancelable: true,
+      })
+    );
+    this.querySelector("#Accepted").dispatchEvent(
+      new CustomEvent("workSpaceChanged", {
+        bubbles: true,
+        cancelable: true,
+      })
+    );
   }
 
   async handleCreateProject(event) {
     const response = await createProject(event.detail.message);
     if (response.status == 200) {
       alert("Project Created successfully");
-    } 
+    }
   }
   async handleGetProjects(event) {
-       const data = await getAllProjects();
-       this.querySelector("#work-space-select").dispatchEvent(
-         new CustomEvent("renderProjectOptions", {
-           bubbles: true,
-           cancelable: true,
-           detail: {
-             message: data,
-           },
-         })
-       );
-    
+    const data = await getAllProjects();
+    this.querySelector("#work-space-select").dispatchEvent(
+      new CustomEvent("renderProjectOptions", {
+        bubbles: true,
+        cancelable: true,
+        detail: {
+          message: data,
+        },
+      })
+    );
   }
 
   async handleFilter(event) {
     const field = event.detail.message.field;
     this.filters[field] = event.detail.message.data;
     const { ToDo, InProgress, Done, Rejected, Accepted } = await applyFilters(
-      this.filters
+      this.filters,this.project
     );
     dipatchEventForId(
       "ToDo",
@@ -199,7 +240,7 @@ class DashboardScreen extends HTMLElement {
 
   async handleGetSrData(event) {
     const type = event.detail.message;
-    const data = await fetchSrDataForSwimlane(type);
+    const data = await fetchSrDataForSwimlane(type, this.project);
     dipatchEventForId(
       type,
       new CustomEvent(customEvents.RENDER_SR_DATA, {
@@ -233,7 +274,7 @@ class DashboardScreen extends HTMLElement {
 
   async handleNewSrCreation(event) {
     const data = event.detail.message;
-    const response = await createSr(data);
+    const response = await createSr(data,this.project);
     if (response.status == 200) {
       dipatchEventForId(
         "sr-form",
@@ -314,4 +355,4 @@ customElements.define("sr-dialog", srDialog);
 customElements.define("multi-select", MultiSelect);
 customElements.define("sr-comment", CommentSection);
 customElements.define("work-space-select", WorkSpaceSelect);
-customElements.define("project-dialog",ProjectDialog)
+customElements.define("project-dialog", ProjectDialog);

@@ -38,11 +38,11 @@ func main() {
 		 return functions.UpdateSr(c,session);
 	})
 
-	app.Get("/getSrData/:status",func(c *fiber.Ctx) error {
+	app.Get("/getSrData/:status/:project",func(c *fiber.Ctx) error {
 		 return functions.GetSrDataForStatus(c,session)
 	})
     
-	app.Post("/filterSrData",func(c *fiber.Ctx) error {
+	app.Post("/filterSrData/:project",func(c *fiber.Ctx) error {
 	    return functions.FilteredData(c,session)
 	})
 

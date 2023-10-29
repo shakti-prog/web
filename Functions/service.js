@@ -26,7 +26,7 @@ export async function signIn(details) {
 }
 
 
-export async function createSr(srData) {
+export async function createSr(srData,project) {
   const serviceRequestObject = {
     no: 0,
     description: srData.description,
@@ -35,7 +35,8 @@ export async function createSr(srData) {
     assignee: srData.assignee,
     reporter: srData.reporter,
     title: srData.title,
-    priority: srData.priority
+    priority: srData.priority,
+    project_name: project
   };
   const options = {
     method: "POST",
@@ -84,9 +85,9 @@ export async function updateSr(srData) {
   }
 }
 
-export async function fetchSrDataForSwimlane(type) {
+export async function fetchSrDataForSwimlane(type,project) {
   try {
-    const response = await fetch(`${url}/getSrData/${type}`);
+    const response = await fetch(`${url}/getSrData/${type}/${project}`);
     const { data } = await response.json();
     return data;
   } catch (error) {
@@ -136,7 +137,7 @@ export async function updateSrField(id, field, value) {
 }
 
 
-export async function applyFilters(filters) {
+export async function applyFilters(filters,project) {
   const obj = {
     Filter:filters
   }
@@ -148,8 +149,9 @@ export async function applyFilters(filters) {
     body: JSON.stringify(obj),
   };
   try {
-    const response = await fetch(`${url}/filterSrData`, options);
+    const response = await fetch(`${url}/filterSrData/${project}`, options);
     const data = await response.json();
+    console.log(response);
     return data;
   } catch (error) {
     console.log(error);
@@ -188,7 +190,5 @@ export async function createProject(title) {
 export async function getAllProjects() {
   const response = await fetch(`${url}/getAllWorkSpaces`);
   const data = await response.json();
-  return data;
-
- 
+  return data; 
 }

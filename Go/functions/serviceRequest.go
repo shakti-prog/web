@@ -6,7 +6,6 @@ import (
 	"strconv"
 	"strings"
 	"time"
-
 	"github.com/gocql/gocql"
 	"github.com/gofiber/fiber/v2"
 )
@@ -23,7 +22,7 @@ func CreateNewSr(c *fiber.Ctx, session *gocql.Session) error {
 	}
 
 	query := session.Query(
-		"INSERT INTO serviceRequest (no,assignee,description,reporter,status,type,priority,title,createdAt,updatedAt) VALUES (?, ?, ?, ?, ?, ?,?,?,toTimestamp(now()),toTimestamp(now()))",
+		"INSERT INTO serviceRequest (no,assignee,description,reporter,status,type,priority,title,createdAt,updatedAt,project_name) VALUES (?, ?, ?, ?, ?, ?,?,?,toTimestamp(now()),toTimestamp(now()),?)",
 		srNo+1,
 		p.Assignee,
 		p.Description,
@@ -32,6 +31,7 @@ func CreateNewSr(c *fiber.Ctx, session *gocql.Session) error {
 		p.Type,
 		p.Priority,
 		p.Title,
+		p.Project,
 	)
 	if err := query.Exec(); err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"Err": "Could not create SR"})
@@ -77,7 +77,8 @@ func UpdateSr(c *fiber.Ctx, session *gocql.Session) error {
 
 func GetSrDataForStatus(c *fiber.Ctx, session *gocql.Session) error {
 	status := c.Params("status")
-	query := session.Query("Select no,description,Type,status,assignee,title,priority,createdAt,updatedAt from serviceRequest where status = ? ALLOW FILTERING", status)
+	project := c.Params("project");
+	query := session.Query("Select no,description,Type,status,assignee,title,priority,createdAt,updatedAt from serviceRequest where status = ? and project_name= ? ALLOW FILTERING", status,project)
 	var data []retrieveSRData
 	scanner := query.Iter().Scanner()
 	for scanner.Next() {
@@ -143,6 +144,7 @@ func GetSrDataForId(c *fiber.Ctx, session *gocql.Session) error {
 //Function for filtering data when filters are added in the front end
 
 func FilteredData(c *fiber.Ctx,session *gocql.Session) error{
+	project := c.Params("project");
 	filter := new(Filters);
 	err := c.BodyParser(filter);
 	if err != nil{
@@ -229,8 +231,12 @@ func FilteredData(c *fiber.Ctx,session *gocql.Session) error{
 	}
 
 	if len(filterString) != 0{
-		queryString += filterString
+		queryString += filterString 
+		queryString += " And project = " + "'"+project+"'" + " ";
+	} else{
+		queryString += " Where project = " + "'"+project+"'" + " ";
 	}
+
    	queryString += " Allow filtering";
 	query := session.Query(queryString);
 	var ToDodata []retrieveSRData;
