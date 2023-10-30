@@ -351,3 +351,14 @@ func insertInInvertedIndex(c *fiber.Ctx,session *gocql.Session,words map[string]
 	}
 	return nil;
 }
+
+
+// func GlobalSearch(c *fiber.Ctx,session *gocql.Session){
+// 	project := c.Params("project");
+// 	term := c.Params("term");
+// 	var sr_no []string;
+// 	query := session.Query("select sr_no from invertedindex where term = ? Allow filtering ",term);
+// 	query.Scan(&sr_no);
+	
+    
+// }
