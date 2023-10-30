@@ -1059,11 +1059,10 @@ class WorkSpaceSelect extends HTMLElement {
         bubbles: true,
         cancelable: true,
         detail: {
-          message:value
-        }
+          message: value,
+        },
       })
     );
-
   }
 
   render() {
