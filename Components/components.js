@@ -94,30 +94,18 @@ class Card extends HTMLElement {
       </div>
     </div>
   </div>
-  <div class="w-48 h-16 text-black text-sm font-normal font-sans leading-none overflow-hidden">
+  <div class="w-48 h-3/5 text-black text-sm font-normal font-sans leading-none overflow-hidden">
     <p class="leading-5"> ${
       Array.isArray(this.cardDetails.description)
         ? this.cardDetails.description.join(" ")
         : this.cardDetails.description
     } </p>
   </div>
- <div class="self-stretch justify-start items-start gap-1.5 flex flex-wrap">
-    <div class="px-1.5 py-1 bg-red-100 rounded justify-center items-center gap-1.5 flex">
-       <div class="text-center text-red-700 text-xs font-normal font-sans" style="font-size: 10px;">Admin Console</div>
-
-    </div>
-    <div class="px-1.5 py-1 bg-indigo-50 rounded justify-center items-center gap-1.5 flex">
-        <div class="text-center text-blue-500 text-xs font-normal font-sans" style="font-size: 10px;">Logistics</div>
-    </div>
-    <div class="px-1.5 py-1 bg-yellow-50 rounded justify-center items-center gap-1.5 flex">
-        <div class="text-center text-yellow-500 text-xs font-normal font-sans" style="font-size: 10px;">Revamp</div>
-    </div> 
-</div>
-  <div class="h-1">
-    <div class="border-t w-48 border-gray-300 my-4"></div>
+  <div class="h-1 mt-2">
+    <div class="border-t w-48 border-gray-300 "></div>
   <div> 
   <div class="self-stretch justify-between items-start inline-flex">
-    <div class="text-zinc-500 text-xs font-normal opacity-60 ">${
+    <div class="text-zinc-500 text-xs font-normal opacity-60 mt-2">${
       this.cardDetails.assignee
     }</div>
    
@@ -1034,7 +1022,7 @@ class ProjectDialog extends HTMLElement {
 class WorkSpaceSelect extends HTMLElement {
   constructor() {
     super();
-    this.options = [];
+    this.options = ["Select workspace"];
   }
 
   connectedCallback() {
@@ -1044,10 +1032,15 @@ class WorkSpaceSelect extends HTMLElement {
       this.handleProjectOptions.bind(this)
     );
     this.addEventListener("change", this.handleChange.bind(this));
+    this.querySelector("select").innerText = "Select Project";
   }
 
   handleProjectOptions(event) {
-    this.options = event.detail.message.Data;
+    let data = event.detail.message.Data;
+    if (!data) {
+      data = [];
+    }
+    this.options = this.options.concat(data);
     this.render();
   }
 
