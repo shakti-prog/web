@@ -36,7 +36,14 @@ func CreateNewSr(c *fiber.Ctx, session *gocql.Session) error {
 	if err := query.Exec(); err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"Err": "Could not create SR"})
 	}
-
+    wordMap := make(map[string]string);
+	createWordMap(p.Description,wordMap);
+	createWordMap(p.Title,wordMap)
+	err := insertInInvertedIndex(c,session,wordMap,int64(srNo)+1);
+	if err != nil{
+		return c.Status(fiber.StatusOK).JSON(fiber.Map{"Message":"Issue in creating inverting index"});
+	}
+	
 	return c.Status(fiber.StatusOK).JSON(fiber.Map{"Message": "SR Successfully created"})
 
 }
@@ -140,8 +147,6 @@ func GetSrDataForId(c *fiber.Ctx, session *gocql.Session) error {
 	})
 
 }
-
-//Function for filtering data when filters are added in the front end
 
 func FilteredData(c *fiber.Ctx, session *gocql.Session) error {
 	project := c.Params("project")
@@ -323,4 +328,26 @@ func GetAllWorkSpaces(c *fiber.Ctx, session *gocql.Session) error {
 
 	return c.Status(fiber.StatusOK).JSON(fiber.Map{"Data": workspaces})
 
+}
+
+func insertInInvertedIndex(c *fiber.Ctx,session *gocql.Session,words map[string]string ,id int64) error{
+	for word,_ := range(words){
+		var exists string;
+		query := session.Query("select term from invertedindex where term = ?",word);
+		query.Scan(&exists);
+		insertValue := "{"+strconv.FormatInt(id, 10)+"}";
+		if exists == ""{
+			err := session.Query("insert into invertedindex(term,sr_no) values(?," + insertValue +")",word).Exec();
+			if err != nil{
+				return err;
+			}
+		} else {
+			err := session.Query("update invertedindex set sr_no = sr_no + " + insertValue + " where term = ?",word).Exec();
+			if err != nil{
+				return err;
+			}
+
+		}
+	}
+	return nil;
 }
