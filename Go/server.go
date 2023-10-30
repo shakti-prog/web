@@ -33,31 +33,31 @@ func main() {
 	app.Post("/updateSrStatus/:no/:status", func(c *fiber.Ctx) error {
 		return functions.UpdateSrStatus(c, session)
 	})
-    
-	app.Post("updateSr/:no" ,func(c *fiber.Ctx) error {
-		 return functions.UpdateSr(c,session);
+
+	app.Post("updateSr/:no", func(c *fiber.Ctx) error {
+		return functions.UpdateSr(c, session)
 	})
 
-	app.Get("/getSrData/:status/:project",func(c *fiber.Ctx) error {
-		 return functions.GetSrDataForStatus(c,session)
-	})
-    
-	app.Post("/filterSrData/:project",func(c *fiber.Ctx) error {
-	    return functions.FilteredData(c,session)
+	app.Get("/getSrData/:status/:project", func(c *fiber.Ctx) error {
+		return functions.GetSrDataForStatus(c, session)
 	})
 
-	app.Get("/getSpecificSrData/:id",func(c *fiber.Ctx) error {
-		return functions.GetSrDataForId(c,session);
+	app.Post("/filterSrData/:project", func(c *fiber.Ctx) error {
+		return functions.FilteredData(c, session)
 	})
 
-	app.Post("/createWorkSpace/:name",func(c *fiber.Ctx) error {
-		return functions.CreateWorkSpace(c,session)
+	app.Get("/getSpecificSrData/:id", func(c *fiber.Ctx) error {
+		return functions.GetSrDataForId(c, session)
 	})
 
-	app.Get("/getAllWorkSpaces",func(c *fiber.Ctx) error {
-		return functions.GetAllWorkSpaces(c,session);
+	app.Post("/createWorkSpace/:name", func(c *fiber.Ctx) error {
+		return functions.CreateWorkSpace(c, session)
 	})
-	
+
+	app.Get("/getAllWorkSpaces", func(c *fiber.Ctx) error {
+		return functions.GetAllWorkSpaces(c, session)
+	})
+
 	err := app.Listen(":9000")
 	if err != nil {
 		fmt.Println("Failed to start server", err)

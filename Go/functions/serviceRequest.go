@@ -2,12 +2,12 @@ package functions
 
 import (
 	"fmt"
+	"github.com/gocql/gocql"
+	"github.com/gofiber/fiber/v2"
 	"sort"
 	"strconv"
 	"strings"
 	"time"
-	"github.com/gocql/gocql"
-	"github.com/gofiber/fiber/v2"
 )
 
 func CreateNewSr(c *fiber.Ctx, session *gocql.Session) error {
@@ -63,11 +63,11 @@ func UpdateSr(c *fiber.Ctx, session *gocql.Session) error {
 	if err = c.BodyParser(p); err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"Error": "Details are missing"})
 	}
-	field := p.Field;
-	value := p.Value;
-	query := session.Query("Update servicerequest set " + field + " = ?  where no = ?", value, no);
-	if field == "comments"{
-		query = session.Query("Update servicerequest set " + field + " = " + field + " + "+ " [ " + "'" +value+"'"+ " ] " + " where no = ?",no);
+	field := p.Field
+	value := p.Value
+	query := session.Query("Update servicerequest set "+field+" = ?  where no = ?", value, no)
+	if field == "comments" {
+		query = session.Query("Update servicerequest set "+field+" = "+field+" + "+" [ "+"'"+value+"'"+" ] "+" where no = ?", no)
 	}
 	if err := query.Exec(); err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"Err": "Could not update SR"})
@@ -77,8 +77,8 @@ func UpdateSr(c *fiber.Ctx, session *gocql.Session) error {
 
 func GetSrDataForStatus(c *fiber.Ctx, session *gocql.Session) error {
 	status := c.Params("status")
-	project := c.Params("project");
-	query := session.Query("Select no,description,Type,status,assignee,title,priority,createdAt,updatedAt from serviceRequest where status = ? and project_name= ? ALLOW FILTERING", status,project)
+	project := c.Params("project")
+	query := session.Query("Select no,description,Type,status,assignee,title,priority,createdAt,updatedAt from serviceRequest where status = ? and project_name= ? ALLOW FILTERING", status, project)
 	var data []retrieveSRData
 	scanner := query.Iter().Scanner()
 	for scanner.Next() {
@@ -91,11 +91,11 @@ func GetSrDataForStatus(c *fiber.Ctx, session *gocql.Session) error {
 		var title string
 		var createdAt time.Time
 		var updatedAt time.Time
-		err := scanner.Scan(&no, &description, &Type, &status, &assignee, &title, &priority, &createdAt,&updatedAt)
+		err := scanner.Scan(&no, &description, &Type, &status, &assignee, &title, &priority, &createdAt, &updatedAt)
 		if err != nil {
 			return c.SendStatus(fiber.StatusInternalServerError)
 		}
-		data1 := retrieveSRData{No: no, Description: strings.Split(description, " "), Type: Type, Status: status, Assignee: assignee, Priority: priority, Title: title, CreatedAt: createdAt,UpdatedAt: updatedAt}
+		data1 := retrieveSRData{No: no, Description: strings.Split(description, " "), Type: Type, Status: status, Assignee: assignee, Priority: priority, Title: title, CreatedAt: createdAt, UpdatedAt: updatedAt}
 		data = append(data, data1)
 	}
 	sort.Slice(data, func(i, j int) bool {
@@ -121,7 +121,7 @@ func GetSrDataForId(c *fiber.Ctx, session *gocql.Session) error {
 	var createdAt time.Time
 	var updatedAt time.Time
 	var comments []string
-	err = query.Scan(&no, &description, &title, &Type, &status, &reporter, &assignee, &priority, &createdAt, &updatedAt,&comments)
+	err = query.Scan(&no, &description, &title, &Type, &status, &reporter, &assignee, &priority, &createdAt, &updatedAt, &comments)
 	if err != nil {
 		return c.Status(fiber.StatusBadGateway).JSON(fiber.Map{"Error": "No such card exists"})
 	}
@@ -136,137 +136,144 @@ func GetSrDataForId(c *fiber.Ctx, session *gocql.Session) error {
 		"priority":    priority,
 		"createdAt":   getNumberOfDays(createdAt),
 		"updatedAt":   getNumberOfDays(updatedAt),
-		"comments" : reverseArray(comments),
+		"comments":    reverseArray(comments),
 	})
 
 }
 
 //Function for filtering data when filters are added in the front end
 
-func FilteredData(c *fiber.Ctx,session *gocql.Session) error{
-	project := c.Params("project");
-	filter := new(Filters);
-	err := c.BodyParser(filter);
-	if err != nil{
-		fmt.Println(err);
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"Message":"Invalid body"})
+func FilteredData(c *fiber.Ctx, session *gocql.Session) error {
+	project := c.Params("project")
+	filter := new(Filters)
+	err := c.BodyParser(filter)
+	if err != nil {
+		fmt.Println(err)
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"Message": "Invalid body"})
 	}
-    assigneeFilterValues := filter.Filter["assignee"];
-	reporterFilterValues := filter.Filter["reporter"];
-	priorityFilterValues := filter.Filter["priority"];
-	statusFilterValues := filter.Filter["status"];
-	typeFilterValues := filter.Filter["type"];
-	queryString :="Select no,description,title,Type,status,reporter,assignee,priority,createdAt,updatedAt from serviceRequest  ";
-	queryString += " ";
-	filterString := "";
-	if(len(assigneeFilterValues) != 0){
-       filterString += " Where assignee in ("
-	   for index,value := range assigneeFilterValues{
-		 filterString += "'"+value + "'";
-		 if index != len(assigneeFilterValues)-1{
-			filterString += ","
-		 }
-	   }
-	   filterString += ")"
+	assigneeFilterValues := filter.Filter["assignee"]
+	reporterFilterValues := filter.Filter["reporter"]
+	priorityFilterValues := filter.Filter["priority"]
+	statusFilterValues := filter.Filter["status"]
+	typeFilterValues := filter.Filter["type"]
+	queryString := "Select no,description,title,Type,status,reporter,assignee,priority,createdAt,updatedAt from serviceRequest  "
+	queryString += " "
+	filterString := ""
+	if len(assigneeFilterValues) != 0 {
+		filterString += " Where assignee in ("
+		for index, value := range assigneeFilterValues {
+			filterString += "'" + value + "'"
+			if index != len(assigneeFilterValues)-1 {
+				filterString += ","
+			}
+		}
+		filterString += ")"
 	}
-	if(len(reporterFilterValues) != 0){
-		if len(filterString) == 0{
+	if len(reporterFilterValues) != 0 {
+		if len(filterString) == 0 {
 			filterString += " Where reporter in ("
-		 } else{
-             filterString += " And reporter in ("
-		 }
-       
-	   for index,value := range reporterFilterValues{
-		 filterString += "'"+value + "'";
-		 if index != len(reporterFilterValues)-1{
-			filterString += ","
-		 }
-	   }
-	   filterString += ")"
+		} else {
+			filterString += " And reporter in ("
+		}
+
+		for index, value := range reporterFilterValues {
+			filterString += "'" + value + "'"
+			if index != len(reporterFilterValues)-1 {
+				filterString += ","
+			}
+		}
+		filterString += ")"
 	}
-	if(len(priorityFilterValues) != 0){
-		if len(filterString) == 0{
+	if len(priorityFilterValues) != 0 {
+		if len(filterString) == 0 {
 			filterString += " Where priority in ("
-		 } else{
-             filterString += " And priority in ("
-		 }
-       
-	   for index,value := range priorityFilterValues{
-		 filterString += "'"+value + "'";
-		 if index != len(priorityFilterValues)-1{
-			filterString += ","
-		 }
-	   }
-	   filterString += ")"
+		} else {
+			filterString += " And priority in ("
+		}
+
+		for index, value := range priorityFilterValues {
+			filterString += "'" + value + "'"
+			if index != len(priorityFilterValues)-1 {
+				filterString += ","
+			}
+		}
+		filterString += ")"
 	}
-    if(len(statusFilterValues) != 0){
-		if len(filterString) == 0{
+	if len(statusFilterValues) != 0 {
+		if len(filterString) == 0 {
 			filterString += " Where status in ("
-		 } else{
-             filterString += " And status in ("
-		 }
-       
-	   for index,value := range statusFilterValues{
-		 filterString += "'"+value + "'";
-		 if index != len(statusFilterValues)-1{
-			filterString += ","
-		 }
-	   }
-	   filterString += ")"
+		} else {
+			filterString += " And status in ("
+		}
+
+		for index, value := range statusFilterValues {
+			filterString += "'" + value + "'"
+			if index != len(statusFilterValues)-1 {
+				filterString += ","
+			}
+		}
+		filterString += ")"
 	}
-	if(len(typeFilterValues) != 0){
-		if len(filterString) == 0{
+	if len(typeFilterValues) != 0 {
+		if len(filterString) == 0 {
 			filterString += " Where type in ("
-		 } else{
-             filterString += " And type in ("
-		 }
-       
-	   for index,value := range typeFilterValues{
-		 filterString += "'"+value + "'";
-		 if index != len(typeFilterValues)-1{
-			filterString += ","
-		 }
-	   }
-	   filterString += ")"
+		} else {
+			filterString += " And type in ("
+		}
+
+		for index, value := range typeFilterValues {
+			filterString += "'" + value + "'"
+			if index != len(typeFilterValues)-1 {
+				filterString += ","
+			}
+		}
+		filterString += ")"
 	}
 
-	if len(filterString) != 0{
-		queryString += filterString 
-		queryString += " And project_name = " + "'"+project+"'" + " ";
-	} else{
-		queryString += " Where project_name = " + "'"+project+"'" + " ";
+	if len(filterString) != 0 {
+		queryString += filterString
+		queryString += " And project_name = " + "'" + project + "'" + " "
+	} else {
+		queryString += " Where project_name = " + "'" + project + "'" + " "
 	}
 
-   	queryString += " Allow filtering";
-	query := session.Query(queryString);
-	var ToDodata []retrieveSRData;
-	var InProgress []retrieveSRData;
-	var Done []retrieveSRData;
-	var Rejected []retrieveSRData;
-	var Accepted []retrieveSRData;
+	queryString += " Allow filtering"
+	query := session.Query(queryString)
+	var ToDodata []retrieveSRData
+	var InProgress []retrieveSRData
+	var Done []retrieveSRData
+	var Rejected []retrieveSRData
+	var Accepted []retrieveSRData
 	scanner := query.Iter().Scanner()
 	for scanner.Next() {
-		var no int64 ;var description string; var Type string; var status string ;var reporter string
-	    var assignee string ;var priority string ;var title string ;var createdAt time.Time; var updatedAt time.Time
-		err := scanner.Scan(&no, &description, &title, &Type, &status, &reporter, &assignee,&priority,&createdAt,&updatedAt)
+		var no int64
+		var description string
+		var Type string
+		var status string
+		var reporter string
+		var assignee string
+		var priority string
+		var title string
+		var createdAt time.Time
+		var updatedAt time.Time
+		err := scanner.Scan(&no, &description, &title, &Type, &status, &reporter, &assignee, &priority, &createdAt, &updatedAt)
 		if err != nil {
-			fmt.Println(err);
+			fmt.Println(err)
 			return c.SendStatus(fiber.StatusInternalServerError)
 		}
-		data := retrieveSRData{No: no, Description: strings.Split(description, " "), Type: Type,Reporter: reporter, Status: status, Assignee: assignee, Priority: priority, Title: title, CreatedAt: createdAt,UpdatedAt: updatedAt}
-		if status == "ToDo"{
-            ToDodata = append(ToDodata, data);
-		} else if status == "InProgress"{
-			InProgress = append(InProgress, data);
-		} else if status == "Done"{
+		data := retrieveSRData{No: no, Description: strings.Split(description, " "), Type: Type, Reporter: reporter, Status: status, Assignee: assignee, Priority: priority, Title: title, CreatedAt: createdAt, UpdatedAt: updatedAt}
+		if status == "ToDo" {
+			ToDodata = append(ToDodata, data)
+		} else if status == "InProgress" {
+			InProgress = append(InProgress, data)
+		} else if status == "Done" {
 			Done = append(Done, data)
-		} else if status == "Accpeted"{
+		} else if status == "Accpeted" {
 			Accepted = append(Accepted, data)
-		} else{
-			Rejected = append(Rejected, data);
+		} else {
+			Rejected = append(Rejected, data)
 		}
-		
-		
+
 	}
 	sort.Slice(ToDodata, func(i, j int) bool {
 		return ToDodata[j].UpdatedAt.Before(ToDodata[i].UpdatedAt)
@@ -277,22 +284,22 @@ func FilteredData(c *fiber.Ctx,session *gocql.Session) error{
 	sort.Slice(Done, func(i, j int) bool {
 		return Done[j].UpdatedAt.Before(Done[i].UpdatedAt)
 	})
-   sort.Slice(Accepted, func(i, j int) bool {
+	sort.Slice(Accepted, func(i, j int) bool {
 		return Accepted[j].UpdatedAt.Before(Accepted[i].UpdatedAt)
 	})
 	sort.Slice(Rejected, func(i, j int) bool {
 		return Rejected[j].UpdatedAt.Before(Rejected[i].UpdatedAt)
 	})
 
-	return c.Status(fiber.StatusOK).JSON(fiber.Map{"ToDo":ToDodata,"InProgress":InProgress,"Done":Done,"Rejected":Rejected,"Accepted":Accepted})
+	return c.Status(fiber.StatusOK).JSON(fiber.Map{"ToDo": ToDodata, "InProgress": InProgress, "Done": Done, "Rejected": Rejected, "Accepted": Accepted})
 
 }
 
-func CreateWorkSpace(c *fiber.Ctx,session *gocql.Session) error{
-	projectName := c.Params("name");
+func CreateWorkSpace(c *fiber.Ctx, session *gocql.Session) error {
+	projectName := c.Params("name")
 
 	query := session.Query(
-		"INSERT INTO project (project_name,project_id) VALUES (?,uuid())",projectName,
+		"INSERT INTO project (project_name,project_id) VALUES (?,uuid())", projectName,
 	)
 	if err := query.Exec(); err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"Err": "Could not Project"})
@@ -301,23 +308,19 @@ func CreateWorkSpace(c *fiber.Ctx,session *gocql.Session) error{
 	return c.Status(fiber.StatusOK).JSON(fiber.Map{"Message": "Project Successfully created"})
 }
 
-func GetAllWorkSpaces(c *fiber.Ctx,session *gocql.Session) error{
-	query := session.Query("Select project_name from project");
-	var workspaces []string;
-	scanner := query.Iter().Scanner();
-	for scanner.Next(){
-      var workspace string;
-      err := scanner.Scan(&workspace);
-	  if err != nil{
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"Err": "Something went wrong"})
-	  }
-	  workspaces = append(workspaces, workspace)
+func GetAllWorkSpaces(c *fiber.Ctx, session *gocql.Session) error {
+	query := session.Query("Select project_name from project")
+	var workspaces []string
+	scanner := query.Iter().Scanner()
+	for scanner.Next() {
+		var workspace string
+		err := scanner.Scan(&workspace)
+		if err != nil {
+			return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"Err": "Something went wrong"})
+		}
+		workspaces = append(workspaces, workspace)
 	}
-    
-	return c.Status(fiber.StatusOK).JSON(fiber.Map{"Data":workspaces})
-    
 
+	return c.Status(fiber.StatusOK).JSON(fiber.Map{"Data": workspaces})
 
 }
-
-
