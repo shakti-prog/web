@@ -205,6 +205,11 @@ class DashboardScreen extends HTMLElement {
         },
       })
     );
+    this.filters.assignee = [];
+    this.filters.priority = [];
+    this.filters.reporter = [];
+    this.filters.status = [];
+    this.filters.type = [];
   }
 
   async handleSrFieldChange(event) {

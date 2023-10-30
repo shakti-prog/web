@@ -232,9 +232,9 @@ func FilteredData(c *fiber.Ctx,session *gocql.Session) error{
 
 	if len(filterString) != 0{
 		queryString += filterString 
-		queryString += " And project = " + "'"+project+"'" + " ";
+		queryString += " And project_name = " + "'"+project+"'" + " ";
 	} else{
-		queryString += " Where project = " + "'"+project+"'" + " ";
+		queryString += " Where project_name = " + "'"+project+"'" + " ";
 	}
 
    	queryString += " Allow filtering";
