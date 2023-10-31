@@ -8,6 +8,7 @@ import {
   applyFilters,
   createProject,
   getAllProjects,
+  globalSearch,
 } from "./Functions/service.js";
 import {
   RouterComponent,
@@ -96,6 +97,28 @@ class DashboardScreen extends HTMLElement {
       this.handleGetProjects.bind(this)
     );
     this.addEventListener("changeProject", this.handleChangeProject.bind(this));
+    this.addEventListener("globalSearch", this.handleGlobalSearch.bind(this));
+  }
+
+  async handleGlobalSearch(event) {
+    const term = event.detail.message;
+    if (term && term.trim().length >= 3) {
+      const { data } = await globalSearch(term, this.project);
+      for (const name of Object.values(swimlaneNames)) {
+        dipatchEventForId(
+          name,
+          new CustomEvent(customEvents.RENDER_SR_DATA, {
+            bubbles: true,
+            cancelable: true,
+            detail: {
+              message: data
+                ? data.filter((srObject) => srObject.status === name)
+                : [],
+            },
+          })
+        );
+      }
+    }
   }
 
   handleChangeProject(event) {
@@ -130,6 +153,11 @@ class DashboardScreen extends HTMLElement {
         cancelable: true,
       })
     );
+    this.filters.assignee = [];
+    this.filters.priority = [];
+    this.filters.status = [];
+    this.filters.type = [];
+    this.filters.reporter = [];
   }
 
   async handleCreateProject(event) {
@@ -155,81 +183,20 @@ class DashboardScreen extends HTMLElement {
     const field = event.detail.message.field;
     this.filters[field] = event.detail.message.data;
     const { data } = await applyFilters(this.filters, this.project);
-    console.log(data);
-    dipatchEventForId(
-      swimlaneNames.ToDo,
-      new CustomEvent(customEvents.RENDER_SR_DATA, {
-        bubbles: true,
-        cancelable: true,
-        detail: {
-          message: data
-            ? data.filter((srObject) => srObject.status === swimlaneNames.ToDo)
-            : [],
-        },
-      })
-    );
-    dipatchEventForId(
-      swimlaneNames.InProgress,
-      new CustomEvent(customEvents.RENDER_SR_DATA, {
-        bubbles: true,
-        cancelable: true,
-        detail: {
-          message: data
-            ? data.filter(
-                (srObject) => srObject.status === swimlaneNames.InProgress
-              )
-            : [],
-        },
-      })
-    );
-
-    dipatchEventForId(
-      swimlaneNames.Done,
-      new CustomEvent(customEvents.RENDER_SR_DATA, {
-        bubbles: true,
-        cancelable: true,
-        detail: {
-          message: data
-            ? data.filter((srObject) => srObject.status === swimlaneNames.Done)
-            : [],
-        },
-      })
-    );
-
-    dipatchEventForId(
-      swimlaneNames.Rejected,
-      new CustomEvent(customEvents.RENDER_SR_DATA, {
-        bubbles: true,
-        cancelable: true,
-        detail: {
-          message: data
-            ? data.filter(
-                (srObject) => srObject.status === swimlaneNames.Rejected
-              )
-            : [],
-        },
-      })
-    );
-
-    dipatchEventForId(
-      swimlaneNames.Accepted,
-      new CustomEvent(customEvents.RENDER_SR_DATA, {
-        bubbles: true,
-        cancelable: true,
-        detail: {
-          message: data
-            ? data.filter(
-                (srObject) => srObject.status === swimlaneNames.Accepted
-              )
-            : [],
-        },
-      })
-    );
-    this.filters.assignee = [];
-    this.filters.priority = [];
-    this.filters.reporter = [];
-    this.filters.status = [];
-    this.filters.type = [];
+    for (const name of Object.values(swimlaneNames)) {
+      dipatchEventForId(
+        name,
+        new CustomEvent(customEvents.RENDER_SR_DATA, {
+          bubbles: true,
+          cancelable: true,
+          detail: {
+            message: data
+              ? data.filter((srObject) => srObject.status === name)
+              : [],
+          },
+        })
+      );
+    }
   }
 
   async handleSrFieldChange(event) {

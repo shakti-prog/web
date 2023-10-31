@@ -225,11 +225,26 @@ class SwimlaneBody extends HTMLElement {
       "click",
       this.handleCreateProject.bind(this)
     );
+    this.querySelector("#global-search").addEventListener('change', this.handleGlobalSearch.bind(this));
     dipatchEventForId(
       idConstants.DASHBOARD_SCREEN,
       new CustomEvent("getProjectOptions", {
         bubbles: true,
         cancelable: true,
+      })
+    );
+  }
+
+  handleGlobalSearch(event) {
+    const term = event.target.value;
+    dipatchEventForId(
+      idConstants.DASHBOARD_SCREEN,
+      new CustomEvent("globalSearch", {
+        bubbles: true,
+        cancelable: true,
+        detail: {
+          message : term
+        }
       })
     );
   }
@@ -265,10 +280,14 @@ class SwimlaneBody extends HTMLElement {
             <div class="text-zinc-500 text-sm font-normal font-['Gilroy-Medium']">Backlog</div>
             <div class="self-stretch h-px opacity-0 border border-zinc-500"></div>
         </div>
-          <div class="flex ml-8">
-    <button id="work-space-create-button" class="rounded bg-blue-500 px-2 py-1 text-sm font-semibold text-white hover:bg-blue-700">Add workspace</button>
-    <work-space-select id="work-space-select"> </work-space-select>
-  </div>
+        <div class="flex ml-8 gap-8">
+            <button id="work-space-create-button" class="rounded bg-blue-500 px-2 py-1 text-sm font-semibold text-white hover:bg-blue-700">Add workspace</button>
+            <work-space-select id="work-space-select"> </work-space-select>
+            <input type="text" disabled id="global-search" name="global-search" placeholder="Search" class="ml-6 h-8 border border-gray-300 rounded">
+        </div>
+
+       <div>
+    </div>
     </div>
     <div class="w-96 h-10 relative">
         <div class="left-0 top-0 absolute flex-col justify-start items-start gap-1 inline-flex">

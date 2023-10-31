@@ -191,3 +191,9 @@ export async function getAllProjects() {
   const data = await response.json();
   return data; 
 }
+
+export async function globalSearch(term, project) {
+  const response = await fetch(`${url}/globalSearch/${project}/${term}`);
+  const data = await response.json();
+  return data;
+}

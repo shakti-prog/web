@@ -348,7 +348,7 @@ func GlobalSearch(c *fiber.Ctx, session *gocql.Session) error {
 		if err != nil {
 			return c.Status(fiber.StatusNotFound).JSON(fiber.Map{"data": returnData})
 		}
-		data := retrieveSRData{No: no, Description:strings.Split(description, ""),Type: Type, Assignee: assignee, Priority: priority, Title: title}
+		data := retrieveSRData{No: no, Description:strings.Split(description, " "),Type: Type,Status: status, Assignee: assignee, Priority: priority, Title: title}
 		returnData = append(returnData, data)
 	}
 	return c.Status(fiber.StatusOK).JSON(fiber.Map{"data": returnData})
