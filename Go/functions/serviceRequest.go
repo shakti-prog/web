@@ -36,13 +36,16 @@ func CreateNewSr(c *fiber.Ctx, session *gocql.Session) error {
 	if err := query.Exec(); err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"Err": "Could not create SR"})
 	}
-	wordMap := make(map[string]string)
-	createWordMap(p.Description, wordMap)
-	createWordMap(p.Title, wordMap)
-	err := insertInInvertedIndex(c, session, wordMap, int64(srNo)+1)
-	if err != nil {
-		return c.Status(fiber.StatusOK).JSON(fiber.Map{"Message": "Issue in creating inverting index"})
+	for _,word := range(strings.Fields(p.Description)){
+		insertInInvertedIndex(c,session,word,int64(srNo)+1);
 	}
+	for _,word := range(strings.Fields(p.Title)){
+		insertInInvertedIndex(c,session,word,int64(srNo)+1);
+	}
+	// err := insertInInvertedIndex(c, session, wordMap, int64(srNo)+1)
+	// if err != nil {
+	// 	return c.Status(fiber.StatusOK).JSON(fiber.Map{"Message": "Issue in creating inverting index"})
+	// }
 
 	return c.Status(fiber.StatusOK).JSON(fiber.Map{"Message": "SR Successfully created"})
 
@@ -304,9 +307,8 @@ func GetAllWorkSpaces(c *fiber.Ctx, session *gocql.Session) error {
 
 }
 
-func insertInInvertedIndex(c *fiber.Ctx, session *gocql.Session, words map[string]string, id int64) error {
-	for word, _ := range words {
-		var exists string
+func insertInInvertedIndex(c *fiber.Ctx, session *gocql.Session,word string, id int64) error {
+	    var exists string;
 		query := session.Query("select term from invertedindex where term = ?", word)
 		query.Scan(&exists)
 		insertValue := "{" + strconv.FormatInt(id, 10) + "}"
@@ -315,15 +317,47 @@ func insertInInvertedIndex(c *fiber.Ctx, session *gocql.Session, words map[strin
 			if err != nil {
 				return err
 			}
+			err = insertNgrams(c,session,word)
+			if err != nil{
+				return err;
+			}
 		} else {
 			err := session.Query("update invertedindex set sr_no = sr_no + "+insertValue+" where term = ?", word).Exec()
 			if err != nil {
 				return err
 			}
-		}
-	}
+		}	
+
 	return nil
 }
+
+
+func insertNgrams(c *fiber.Ctx,session *gocql.Session,word string) error{
+	wordMap := createWordMap(word);
+	for key,_ := range(wordMap){
+		var exists string;
+		insertValue := "{'" +word+ "'}";
+		query := session.Query("select n_gram from n_grams where n_gram = ?", key);
+		query.Scan(&exists);
+		if exists == ""{
+			err := session.Query("insert into n_grams(n_gram,parent_word) values(?,"+insertValue+")", key).Exec()
+			if err != nil {
+				return err
+			}
+		} else{
+			err := session.Query("update n_grams set parent_word = parent_word + "+insertValue+" where n_gram = ?", key).Exec()
+			if err != nil {
+				return err
+			}
+		}
+	}
+	return nil;
+}
+
+
+
+
+
 
 func GlobalSearch(c *fiber.Ctx, session *gocql.Session) error {
 	project := c.Params("project")
