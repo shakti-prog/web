@@ -58,9 +58,9 @@ func main() {
 		return functions.GetAllWorkSpaces(c, session)
 	})
 
-	// app.Get("/globalSearch/:project/:term",func(c *fiber.Ctx) error {
-	// 	return functions.GlobalSearch(c,session)
-	// })
+	app.Get("/globalSearch/:project/:term",func(c *fiber.Ctx) error {
+		return functions.GlobalSearch(c,session)
+	})
 
 	err := app.Listen(":9000")
 	if err != nil {

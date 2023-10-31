@@ -26,7 +26,11 @@ import {
   WorkSpaceSelect,
   ProjectDialog,
 } from "./Components/components.js";
-import { customEvents, idConstants, swimlaneNames } from "./constants/idConstants.js";
+import {
+  customEvents,
+  idConstants,
+  swimlaneNames,
+} from "./constants/idConstants.js";
 
 class Router extends HTMLElement {
   constructor() {
@@ -150,58 +154,74 @@ class DashboardScreen extends HTMLElement {
   async handleFilter(event) {
     const field = event.detail.message.field;
     this.filters[field] = event.detail.message.data;
-    const { data } = await applyFilters(
-      this.filters,this.project
-    );
+    const { data } = await applyFilters(this.filters, this.project);
+    console.log(data);
     dipatchEventForId(
-      "ToDo",
+      swimlaneNames.ToDo,
       new CustomEvent(customEvents.RENDER_SR_DATA, {
         bubbles: true,
         cancelable: true,
         detail: {
-          message: data ? data.filter((srObject)=> srObject.status === swimlaneNames.ToDo) : []
+          message: data
+            ? data.filter((srObject) => srObject.status === swimlaneNames.ToDo)
+            : [],
         },
       })
     );
     dipatchEventForId(
-      "InProgress",
+      swimlaneNames.InProgress,
       new CustomEvent(customEvents.RENDER_SR_DATA, {
         bubbles: true,
         cancelable: true,
         detail: {
-          message: data ? data.filter((srObject)=>srObject.status === swimlaneNames.InProgress) : []
-        },
-      })
-    );
-
-    dipatchEventForId(
-      "Done",
-      new CustomEvent(customEvents.RENDER_SR_DATA, {
-        bubbles: true,
-        cancelable: true,
-        detail: {
-          message: data ? data.filter((srObject)=>srObject.status === swimlaneNames.Done) : [],
-        },
-      })
-    );
-    dipatchEventForId(
-      "Rejected",
-      new CustomEvent(customEvents.RENDER_SR_DATA, {
-        bubbles: true,
-        cancelable: true,
-        detail: {
-          message: data ? data.filter((srObject)=>srObject.status === swimlaneNames.Rejected) : []
+          message: data
+            ? data.filter(
+                (srObject) => srObject.status === swimlaneNames.InProgress
+              )
+            : [],
         },
       })
     );
 
     dipatchEventForId(
-      "Accepted",
+      swimlaneNames.Done,
       new CustomEvent(customEvents.RENDER_SR_DATA, {
         bubbles: true,
         cancelable: true,
         detail: {
-          message: Accepted ? Accepted : [],
+          message: data
+            ? data.filter((srObject) => srObject.status === swimlaneNames.Done)
+            : [],
+        },
+      })
+    );
+
+    dipatchEventForId(
+      swimlaneNames.Rejected,
+      new CustomEvent(customEvents.RENDER_SR_DATA, {
+        bubbles: true,
+        cancelable: true,
+        detail: {
+          message: data
+            ? data.filter(
+                (srObject) => srObject.status === swimlaneNames.Rejected
+              )
+            : [],
+        },
+      })
+    );
+
+    dipatchEventForId(
+      swimlaneNames.Accepted,
+      new CustomEvent(customEvents.RENDER_SR_DATA, {
+        bubbles: true,
+        cancelable: true,
+        detail: {
+          message: data
+            ? data.filter(
+                (srObject) => srObject.status === swimlaneNames.Accepted
+              )
+            : [],
         },
       })
     );
@@ -216,7 +236,7 @@ class DashboardScreen extends HTMLElement {
     const field = event.detail.message.field;
     const value = event.detail.message.value;
     const id = event.detail.message.id;
-    const response = await updateSrField(id, field, value,this.project);
+    const response = await updateSrField(id, field, value, this.project);
     if (response.status == 200) {
       const data = await getSpecificSr(id);
       dipatchEventForId(
@@ -262,7 +282,7 @@ class DashboardScreen extends HTMLElement {
     const id = event.detail.message.no;
     const previous = event.detail.message.previousStatus;
     const status = event.detail.message.status;
-    await updateSr({ no: id, status ,project:this.project });
+    await updateSr({ no: id, status, project: this.project });
     const event1 = new CustomEvent(customEvents.GET_DATA_FOR_SWIMLANE, {
       bubbles: true,
       cancelable: true,
@@ -279,7 +299,7 @@ class DashboardScreen extends HTMLElement {
 
   async handleNewSrCreation(event) {
     const data = event.detail.message;
-    const response = await createSr(data,this.project);
+    const response = await createSr(data, this.project);
     if (response.status == 200) {
       dipatchEventForId(
         "sr-form",

@@ -29,11 +29,7 @@ func reverseArray(arr []string) []string {
 func createWordMap(text string,word map[string]string) map[string]string{
  words := strings.Fields(text);
  for _,w := range words {
-		for i := 0; i <= len(w)-3; i++ {
-			substring := w[i : i+3]
-			word[substring] = substring
-		}
+		word[w]= w;
 	}
-
-	return word
+return word
 }

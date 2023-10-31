@@ -930,7 +930,6 @@ class CommentSection extends HTMLElement {
 
   handleGetComments(event) {
     const commentData = event.detail.message;
-    console.log(commentData);
     if (!commentData) {
       this.comments = [];
     } else {
@@ -1040,6 +1039,7 @@ class WorkSpaceSelect extends HTMLElement {
     if (!data) {
       data = [];
     }
+    this.options = ["Select workspace"];
     this.options = this.options.concat(data);
     this.render();
   }
