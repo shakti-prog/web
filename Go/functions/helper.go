@@ -25,11 +25,16 @@ func reverseArray(arr []string) []string {
 	return arr
 }
 
+func createWordMap(text string, word map[string]string) map[string]string {
+	words := strings.Fields(text)
+	for _, text := range words {
+		for n := 3; n <= len(text); n++ {
+			for i := 0; i <= len(text)-n; i++ {
+				ngram := text[i : i+n]
+				word[ngram] = ngram
+			}
+		}
 
-func createWordMap(text string,word map[string]string) map[string]string{
- words := strings.Fields(text);
- for _,w := range words {
-		word[w]= w;
 	}
-return word
+	return word
 }

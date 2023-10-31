@@ -36,14 +36,14 @@ func CreateNewSr(c *fiber.Ctx, session *gocql.Session) error {
 	if err := query.Exec(); err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"Err": "Could not create SR"})
 	}
-    wordMap := make(map[string]string);
-	createWordMap(p.Description,wordMap);
-	createWordMap(p.Title,wordMap)
-	err := insertInInvertedIndex(c,session,wordMap,int64(srNo)+1);
-	if err != nil{
-		return c.Status(fiber.StatusOK).JSON(fiber.Map{"Message":"Issue in creating inverting index"});
+	wordMap := make(map[string]string)
+	createWordMap(p.Description, wordMap)
+	createWordMap(p.Title, wordMap)
+	err := insertInInvertedIndex(c, session, wordMap, int64(srNo)+1)
+	if err != nil {
+		return c.Status(fiber.StatusOK).JSON(fiber.Map{"Message": "Issue in creating inverting index"})
 	}
-	
+
 	return c.Status(fiber.StatusOK).JSON(fiber.Map{"Message": "SR Successfully created"})
 
 }
@@ -55,7 +55,7 @@ func UpdateSrStatus(c *fiber.Ctx, session *gocql.Session) error {
 	}
 	status := c.Params("status")
 	project := c.Params("project")
-	query := session.Query("Update servicerequest set status = ?,updatedAt = toTimestamp(now()) where project_name = ? and  no = ?",status,project,no)
+	query := session.Query("Update servicerequest set status = ?,updatedAt = toTimestamp(now()) where project_name = ? and  no = ?", status, project, no)
 	if err := query.Exec(); err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"Err": "Could not update SR"})
 	}
@@ -74,9 +74,9 @@ func UpdateSr(c *fiber.Ctx, session *gocql.Session) error {
 	field := p.Field
 	value := p.Value
 	project := c.Params("project")
-	query := session.Query("Update servicerequest set "+field+" = ?  where project_name = ? and no = ?", value, project,no);
+	query := session.Query("Update servicerequest set "+field+" = ?  where project_name = ? and no = ?", value, project, no)
 	if field == "comments" {
-		query = session.Query("Update servicerequest set "+field+" = "+field+" + "+" [ "+"'"+value+"'"+" ] "+" where project_name=? and no = ?", project,no)
+		query = session.Query("Update servicerequest set "+field+" = "+field+" + "+" [ "+"'"+value+"'"+" ] "+" where project_name=? and no = ?", project, no)
 	}
 	if err := query.Exec(); err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"Err": "Could not update SR"})
@@ -246,7 +246,7 @@ func FilteredData(c *fiber.Ctx, session *gocql.Session) error {
 
 	queryString += " Allow filtering"
 	query := session.Query(queryString)
-	var returnData []retrieveSRData;
+	var returnData []retrieveSRData
 	scanner := query.Iter().Scanner()
 	for scanner.Next() {
 		var no int64
@@ -267,10 +267,10 @@ func FilteredData(c *fiber.Ctx, session *gocql.Session) error {
 		data := retrieveSRData{No: no, Description: strings.Split(description, " "), Type: Type, Reporter: reporter, Status: status, Assignee: assignee, Priority: priority, Title: title, CreatedAt: createdAt, UpdatedAt: updatedAt}
 		returnData = append(returnData, data)
 	}
-	sort.Slice(returnData,func(i, j int) bool {
-		return returnData[j].UpdatedAt.Before(returnData[i].UpdatedAt);
+	sort.Slice(returnData, func(i, j int) bool {
+		return returnData[j].UpdatedAt.Before(returnData[i].UpdatedAt)
 	})
-	return c.Status(fiber.StatusOK).JSON(fiber.Map{"data":returnData})
+	return c.Status(fiber.StatusOK).JSON(fiber.Map{"data": returnData})
 
 }
 
@@ -304,54 +304,53 @@ func GetAllWorkSpaces(c *fiber.Ctx, session *gocql.Session) error {
 
 }
 
-func insertInInvertedIndex(c *fiber.Ctx,session *gocql.Session,words map[string]string ,id int64) error{
-	for word,_ := range(words){
-		var exists string;
-		query := session.Query("select term from invertedindex where term = ?",word);
-		query.Scan(&exists);
-		insertValue := "{"+strconv.FormatInt(id, 10)+"}";
-		if exists == ""{
-			err := session.Query("insert into invertedindex(term,sr_no) values(?," + insertValue +")",word).Exec();
-			if err != nil{
-				return err;
+func insertInInvertedIndex(c *fiber.Ctx, session *gocql.Session, words map[string]string, id int64) error {
+	for word, _ := range words {
+		var exists string
+		query := session.Query("select term from invertedindex where term = ?", word)
+		query.Scan(&exists)
+		insertValue := "{" + strconv.FormatInt(id, 10) + "}"
+		if exists == "" {
+			err := session.Query("insert into invertedindex(term,sr_no) values(?,"+insertValue+")", word).Exec()
+			if err != nil {
+				return err
 			}
 		} else {
-			err := session.Query("update invertedindex set sr_no = sr_no + " + insertValue + " where term = ?",word).Exec();
-			if err != nil{
-				return err;
+			err := session.Query("update invertedindex set sr_no = sr_no + "+insertValue+" where term = ?", word).Exec()
+			if err != nil {
+				return err
 			}
 		}
 	}
-	return nil;
+	return nil
 }
 
-
-func GlobalSearch(c *fiber.Ctx,session *gocql.Session) error{
-	project := c.Params("project");
-	term := c.Params("term");
-	var sr_no []string;
-	query := session.Query("select sr_no from invertedindex where term = ? Allow filtering ",term);
-	var returnData []retrieveSRData;
-	err := query.Scan(&sr_no);
-	if err != nil{
-		return c.Status(fiber.StatusOK).JSON(fiber.Map{"data":returnData});
+func GlobalSearch(c *fiber.Ctx, session *gocql.Session) error {
+	project := c.Params("project")
+	term := c.Params("term")
+	var sr_no []string
+	query := session.Query("select sr_no from invertedindex where term = ? Allow filtering ", term)
+	var returnData []retrieveSRData
+	err := query.Scan(&sr_no)
+	if err != nil {
+		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{"data": returnData})
 	}
-	for _,value := range sr_no{
-	    var no int64
-		//var description string
+	for _, value := range sr_no {
+		var no int64
+		var description string
 		var Type string
 		var status string
 		var assignee string
 		var priority string
 		var title string
-		query = session.Query("select no,type,status,assignee,priority,title from servicerequest where project_name = ? and no = ?",project,value);
-		err := query.Scan(&no,&Type,&status,&assignee,&priority,&title);
-		if err != nil{
-			return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"Err": "Something went wrong"})
+		query = session.Query("select no,description,type,status,assignee,priority,title from servicerequest where project_name = ? and no = ?", project, value)
+		err := query.Scan(&no, &description, &Type, &status, &assignee, &priority, &title)
+		if err != nil {
+			return c.Status(fiber.StatusNotFound).JSON(fiber.Map{"data": returnData})
 		}
-		data := retrieveSRData{No: no,Type:Type,Assignee: assignee,Priority: priority,Title: title} 
-		returnData = append(returnData, data) 
+		data := retrieveSRData{No: no, Description:strings.Split(description, ""),Type: Type, Assignee: assignee, Priority: priority, Title: title}
+		returnData = append(returnData, data)
 	}
-	return c.Status(fiber.StatusOK).JSON(fiber.Map{"data":returnData})
-    
+	return c.Status(fiber.StatusOK).JSON(fiber.Map{"data": returnData})
+
 }
