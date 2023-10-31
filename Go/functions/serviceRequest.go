@@ -331,25 +331,25 @@ func GlobalSearch(c *fiber.Ctx,session *gocql.Session) error{
 	term := c.Params("term");
 	var sr_no []string;
 	query := session.Query("select sr_no from invertedindex where term = ? Allow filtering ",term);
+	var returnData []retrieveSRData;
 	err := query.Scan(&sr_no);
 	if err != nil{
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"Err": "Something went wrong"})
+		return c.Status(fiber.StatusOK).JSON(fiber.Map{"data":returnData});
 	}
-	var returnData []retrieveSRData;
 	for _,value := range sr_no{
 	    var no int64
-		var description string
+		//var description string
 		var Type string
 		var status string
 		var assignee string
 		var priority string
 		var title string
-		query = session.Query("select no,description,type,status,assignee,priority,title from servicerequest where project_name = ? and no = ?",project,value);
-		err := query.Scan(&no,&description,&Type,&status,&assignee,&priority,&title);
+		query = session.Query("select no,type,status,assignee,priority,title from servicerequest where project_name = ? and no = ?",project,value);
+		err := query.Scan(&no,&Type,&status,&assignee,&priority,&title);
 		if err != nil{
 			return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"Err": "Something went wrong"})
 		}
-		data := retrieveSRData{No: no,Description: strings.Split(description, ""),Type:Type,Assignee: assignee,Priority: priority,Title: title} 
+		data := retrieveSRData{No: no,Type:Type,Assignee: assignee,Priority: priority,Title: title} 
 		returnData = append(returnData, data) 
 	}
 	return c.Status(fiber.StatusOK).JSON(fiber.Map{"data":returnData})
