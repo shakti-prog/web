@@ -19,3 +19,11 @@ export const customEvents = {
 };
 
 
+export const swimlaneNames = {
+  ToDo: "ToDo",
+  InProgress: "InProgress",
+  Done: "Done",
+  Rejected: "Rejected",
+  Accepted : "Accepted"
+}
+

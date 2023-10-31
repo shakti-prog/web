@@ -54,7 +54,8 @@ func UpdateSrStatus(c *fiber.Ctx, session *gocql.Session) error {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"Err": "Invalid SR number"})
 	}
 	status := c.Params("status")
-	query := session.Query("Update servicerequest set status = ?,updatedAt = toTimestamp(now())  where no = ?", status, no)
+	project := c.Params("project")
+	query := session.Query("Update servicerequest set status = ?,updatedAt = toTimestamp(now()) where project_name = ? and  no = ?",status,project,no)
 	if err := query.Exec(); err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"Err": "Could not update SR"})
 	}
@@ -72,9 +73,10 @@ func UpdateSr(c *fiber.Ctx, session *gocql.Session) error {
 	}
 	field := p.Field
 	value := p.Value
-	query := session.Query("Update servicerequest set "+field+" = ?  where no = ?", value, no)
+	project := c.Params("project")
+	query := session.Query("Update servicerequest set "+field+" = ?  where project_name = ? and no = ?", value, project,no);
 	if field == "comments" {
-		query = session.Query("Update servicerequest set "+field+" = "+field+" + "+" [ "+"'"+value+"'"+" ] "+" where no = ?", no)
+		query = session.Query("Update servicerequest set "+field+" = "+field+" + "+" [ "+"'"+value+"'"+" ] "+" where project_name=? and no = ?", project,no)
 	}
 	if err := query.Exec(); err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"Err": "Could not update SR"})
@@ -244,11 +246,7 @@ func FilteredData(c *fiber.Ctx, session *gocql.Session) error {
 
 	queryString += " Allow filtering"
 	query := session.Query(queryString)
-	var ToDodata []retrieveSRData
-	var InProgress []retrieveSRData
-	var Done []retrieveSRData
-	var Rejected []retrieveSRData
-	var Accepted []retrieveSRData
+	var returnData []retrieveSRData;
 	scanner := query.Iter().Scanner()
 	for scanner.Next() {
 		var no int64
@@ -267,36 +265,12 @@ func FilteredData(c *fiber.Ctx, session *gocql.Session) error {
 			return c.SendStatus(fiber.StatusInternalServerError)
 		}
 		data := retrieveSRData{No: no, Description: strings.Split(description, " "), Type: Type, Reporter: reporter, Status: status, Assignee: assignee, Priority: priority, Title: title, CreatedAt: createdAt, UpdatedAt: updatedAt}
-		if status == "ToDo" {
-			ToDodata = append(ToDodata, data)
-		} else if status == "InProgress" {
-			InProgress = append(InProgress, data)
-		} else if status == "Done" {
-			Done = append(Done, data)
-		} else if status == "Accpeted" {
-			Accepted = append(Accepted, data)
-		} else {
-			Rejected = append(Rejected, data)
-		}
-
+		returnData = append(returnData, data)
 	}
-	sort.Slice(ToDodata, func(i, j int) bool {
-		return ToDodata[j].UpdatedAt.Before(ToDodata[i].UpdatedAt)
+	sort.Slice(returnData,func(i, j int) bool {
+		return returnData[j].UpdatedAt.Before(returnData[i].UpdatedAt);
 	})
-	sort.Slice(InProgress, func(i, j int) bool {
-		return InProgress[j].UpdatedAt.Before(InProgress[i].UpdatedAt)
-	})
-	sort.Slice(Done, func(i, j int) bool {
-		return Done[j].UpdatedAt.Before(Done[i].UpdatedAt)
-	})
-	sort.Slice(Accepted, func(i, j int) bool {
-		return Accepted[j].UpdatedAt.Before(Accepted[i].UpdatedAt)
-	})
-	sort.Slice(Rejected, func(i, j int) bool {
-		return Rejected[j].UpdatedAt.Before(Rejected[i].UpdatedAt)
-	})
-
-	return c.Status(fiber.StatusOK).JSON(fiber.Map{"ToDo": ToDodata, "InProgress": InProgress, "Done": Done, "Rejected": Rejected, "Accepted": Accepted})
+	return c.Status(fiber.StatusOK).JSON(fiber.Map{"data":returnData})
 
 }
 

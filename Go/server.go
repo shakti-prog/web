@@ -30,11 +30,11 @@ func main() {
 		return functions.CreateNewSr(c, session)
 	})
 
-	app.Post("/updateSrStatus/:no/:status", func(c *fiber.Ctx) error {
+	app.Post("/updateSrStatus/:no/:status/:project", func(c *fiber.Ctx) error {
 		return functions.UpdateSrStatus(c, session)
 	})
 
-	app.Post("updateSr/:no", func(c *fiber.Ctx) error {
+	app.Post("updateSr/:no/:project", func(c *fiber.Ctx) error {
 		return functions.UpdateSr(c, session)
 	})
 

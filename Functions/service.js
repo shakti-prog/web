@@ -66,7 +66,7 @@ export async function updateSr(srData) {
   };
   try {
     const response = await fetch(
-      `${url}/updateSrStatus/${srData.no}/${srData.status}`,
+      `${url}/updateSrStatus/${srData.no}/${srData.status}/${srData.project}`,
       options
     );
     if (response.status == 200) {
@@ -110,7 +110,7 @@ export async function getSpecificSr(id) {
 }
 
 
-export async function updateSrField(id, field, value) {
+export async function updateSrField(id, field, value,project){
    const obj = {
      field: field,
      value: value,
@@ -123,7 +123,7 @@ export async function updateSrField(id, field, value) {
     body: JSON.stringify(obj),
   };
   try {
-     const response = await fetch(`${url}/updateSr/${id}`, options);
+     const response = await fetch(`${url}/updateSr/${id}/${project}`, options);
      return response;
   }
   catch (error) {
@@ -151,7 +151,6 @@ export async function applyFilters(filters,project) {
   try {
     const response = await fetch(`${url}/filterSrData/${project}`, options);
     const data = await response.json();
-    console.log(response);
     return data;
   } catch (error) {
     console.log(error);

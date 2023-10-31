@@ -26,7 +26,7 @@ import {
   WorkSpaceSelect,
   ProjectDialog,
 } from "./Components/components.js";
-import { customEvents, idConstants } from "./constants/idConstants.js";
+import { customEvents, idConstants, swimlaneNames } from "./constants/idConstants.js";
 
 class Router extends HTMLElement {
   constructor() {
@@ -150,7 +150,7 @@ class DashboardScreen extends HTMLElement {
   async handleFilter(event) {
     const field = event.detail.message.field;
     this.filters[field] = event.detail.message.data;
-    const { ToDo, InProgress, Done, Rejected, Accepted } = await applyFilters(
+    const { data } = await applyFilters(
       this.filters,this.project
     );
     dipatchEventForId(
@@ -159,7 +159,7 @@ class DashboardScreen extends HTMLElement {
         bubbles: true,
         cancelable: true,
         detail: {
-          message: ToDo ? ToDo : [],
+          message: data ? data.filter((srObject)=> srObject.status === swimlaneNames.ToDo) : []
         },
       })
     );
@@ -169,7 +169,7 @@ class DashboardScreen extends HTMLElement {
         bubbles: true,
         cancelable: true,
         detail: {
-          message: InProgress ? InProgress : null,
+          message: data ? data.filter((srObject)=>srObject.status === swimlaneNames.InProgress) : []
         },
       })
     );
@@ -180,7 +180,7 @@ class DashboardScreen extends HTMLElement {
         bubbles: true,
         cancelable: true,
         detail: {
-          message: Done ? Done : null,
+          message: data ? data.filter((srObject)=>srObject.status === swimlaneNames.Done) : [],
         },
       })
     );
@@ -190,7 +190,7 @@ class DashboardScreen extends HTMLElement {
         bubbles: true,
         cancelable: true,
         detail: {
-          message: Rejected ? Rejected : null,
+          message: data ? data.filter((srObject)=>srObject.status === swimlaneNames.Rejected) : []
         },
       })
     );
@@ -216,7 +216,7 @@ class DashboardScreen extends HTMLElement {
     const field = event.detail.message.field;
     const value = event.detail.message.value;
     const id = event.detail.message.id;
-    const response = await updateSrField(id, field, value);
+    const response = await updateSrField(id, field, value,this.project);
     if (response.status == 200) {
       const data = await getSpecificSr(id);
       dipatchEventForId(
@@ -262,7 +262,7 @@ class DashboardScreen extends HTMLElement {
     const id = event.detail.message.no;
     const previous = event.detail.message.previousStatus;
     const status = event.detail.message.status;
-    await updateSr({ no: id, status });
+    await updateSr({ no: id, status ,project:this.project });
     const event1 = new CustomEvent(customEvents.GET_DATA_FOR_SWIMLANE, {
       bubbles: true,
       cancelable: true,
