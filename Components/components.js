@@ -399,7 +399,7 @@ class SignIn extends HTMLElement {
    <div class="bg-white p-8 rounded shadow-lg w-96">
     <form>
       <div class="mb-4">
-        <label for="username" class="block text-gray-800 text-sm font-semibold mb-2">Username</label>
+        <label for="username" class="block text-gray-800 text-sm font-semibold mb-2">Email</label>
         <input type="text" id="username" name="username" class="w-full p-2 border border-gray-300 rounded">
       </div>
       <div class="mb-4">
