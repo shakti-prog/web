@@ -327,7 +327,6 @@ func insertInInvertedIndex(c *fiber.Ctx, session *gocql.Session,word string, id 
 				return err
 			}
 		}	
-
 	return nil
 }
 
