@@ -42,11 +42,7 @@ func CreateNewSr(c *fiber.Ctx, session *gocql.Session) error {
 	for _,word := range(strings.Fields(p.Title)){
 		insertInInvertedIndex(c,session,word,int64(srNo)+1);
 	}
-	// err := insertInInvertedIndex(c, session, wordMap, int64(srNo)+1)
-	// if err != nil {
-	// 	return c.Status(fiber.StatusOK).JSON(fiber.Map{"Message": "Issue in creating inverting index"})
-	// }
-
+	
 	return c.Status(fiber.StatusOK).JSON(fiber.Map{"Message": "SR Successfully created"})
 
 }
