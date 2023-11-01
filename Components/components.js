@@ -45,7 +45,7 @@ class Card extends HTMLElement {
   handleDoubleClick(event) {
     const id = this.getAttribute("id");
     dipatchEventForId(
-      idConstants.DASHBOARD_SCREEN,
+      idConstants.SCREEN,
       new CustomEvent("openSrModal", {
         bubbles: true,
         cancelable: true,
@@ -135,7 +135,7 @@ class Swimlane extends HTMLElement {
 
   handleWorkSpaceChange(event) {
     dipatchEventForId(
-      idConstants.DASHBOARD_SCREEN,
+      idConstants.SCREEN,
       new CustomEvent(customEvents.GET_DATA_FOR_SWIMLANE, {
         bubbles: true,
         cancelable: true,
@@ -152,7 +152,7 @@ class Swimlane extends HTMLElement {
     event.preventDefault();
     const { id, status } = JSON.parse(event.dataTransfer.getData("id"));
     dipatchEventForId(
-      idConstants.DASHBOARD_SCREEN,
+      idConstants.SCREEN,
       new CustomEvent(customEvents.STATUS_CHANGE, {
         bubbles: true,
         cancelable: true,
@@ -227,7 +227,7 @@ class SwimlaneBody extends HTMLElement {
     );
     this.querySelector("#global-search").addEventListener('change', this.handleGlobalSearch.bind(this));
     dipatchEventForId(
-      idConstants.DASHBOARD_SCREEN,
+      idConstants.SCREEN,
       new CustomEvent("getProjectOptions", {
         bubbles: true,
         cancelable: true,
@@ -238,7 +238,7 @@ class SwimlaneBody extends HTMLElement {
   handleGlobalSearch(event) {
     const term = event.target.value;
     dipatchEventForId(
-      idConstants.DASHBOARD_SCREEN,
+      idConstants.SCREEN,
       new CustomEvent("globalSearch", {
         bubbles: true,
         cancelable: true,
@@ -649,7 +649,7 @@ class srDialog extends HTMLElement {
       return alert("Empty comments not allowed");
     }
     dipatchEventForId(
-      idConstants.DASHBOARD_SCREEN,
+      idConstants.SCREEN,
       new CustomEvent("updateSrField", {
         bubbles: true,
         cancelable: true,
@@ -668,7 +668,7 @@ class srDialog extends HTMLElement {
 
   handleStatusChange(event) {
     dipatchEventForId(
-      idConstants.DASHBOARD_SCREEN,
+      idConstants.SCREEN,
       new CustomEvent(customEvents.STATUS_CHANGE, {
         bubbles: true,
         cancelable: true,
@@ -686,7 +686,7 @@ class srDialog extends HTMLElement {
 
   handlePriorityChange(event) {
     dipatchEventForId(
-      idConstants.DASHBOARD_SCREEN,
+      idConstants.SCREEN,
       new CustomEvent("updateSrField", {
         bubbles: true,
         cancelable: true,
@@ -703,7 +703,7 @@ class srDialog extends HTMLElement {
 
   handleAssigneeChange(event) {
     dipatchEventForId(
-      idConstants.DASHBOARD_SCREEN,
+      idConstants.SCREEN,
       new CustomEvent("updateSrField", {
         bubbles: true,
         cancelable: true,
@@ -720,7 +720,7 @@ class srDialog extends HTMLElement {
 
   handleReporterChange(event) {
     dipatchEventForId(
-      idConstants.DASHBOARD_SCREEN,
+      idConstants.SCREEN,
       new CustomEvent("updateSrField", {
         bubbles: true,
         cancelable: true,
@@ -889,7 +889,7 @@ class MultiSelect extends HTMLElement {
       );
       btnText.innerText = string;
       dipatchEventForId(
-        idConstants.DASHBOARD_SCREEN,
+        idConstants.SCREEN,
         new CustomEvent("applyFilters", {
           bubbles: true,
           cancelable: true,
@@ -903,7 +903,7 @@ class MultiSelect extends HTMLElement {
       );
     } else {
       dipatchEventForId(
-        idConstants.DASHBOARD_SCREEN,
+        idConstants.SCREEN,
         new CustomEvent("applyFilters", {
           bubbles: true,
           cancelable: true,
@@ -1004,7 +1004,7 @@ class ProjectDialog extends HTMLElement {
 
   handleCreateProjectButton(event) {
     dipatchEventForId(
-      idConstants.DASHBOARD_SCREEN,
+      idConstants.SCREEN,
       new CustomEvent("create-project", {
         bubbles: true,
         cancelable: true,
@@ -1015,7 +1015,7 @@ class ProjectDialog extends HTMLElement {
     );
     this.querySelector("#project-dialog").close();
     dipatchEventForId(
-      idConstants.DASHBOARD_SCREEN,
+      idConstants.SCREEN,
       new CustomEvent("getProjectOptions", {
         bubbles: true,
         cancelable: true,
@@ -1066,7 +1066,7 @@ class WorkSpaceSelect extends HTMLElement {
   handleChange(event) {
     const value = event.target.value;
     dipatchEventForId(
-      idConstants.DASHBOARD_SCREEN,
+      idConstants.SCREEN,
       new CustomEvent("changeProject", {
         bubbles: true,
         cancelable: true,

@@ -8,8 +8,8 @@ export function RouterComponent(hash) {
   }
   switch (hash) {
     case "signIn":
-      return `<main-page id="main-page">
-              <sign-in-screen> 
+      return `<main-page>
+              <sign-in-screen id="screen-id"> 
               </sign-in-screen>
                </main-page>`;
     case "signUp":
@@ -18,7 +18,7 @@ export function RouterComponent(hash) {
       const isLoggedIn = checkLogInStatus();
       if (isLoggedIn) {
         return `<main-page id='main-page'>
-                 <dashboard-screen id="dashboard-screen">
+                 <dashboard-screen id="screen-id">
                      <swim-lanebody id="swim-lane-body">
                      </swim-lanebody>
                       <sr-dialog id="sr-dialog">

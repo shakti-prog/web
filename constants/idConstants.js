@@ -1,6 +1,6 @@
 export const idConstants = {
   MAIN_PAGE: "main-page",
-  DASHBOARD_SCREEN: "dashboard-screen",
+  SCREEN: "screen-id",
   SWIM_LANE_BODY: "swim-lane-body",
   SR_FORM_DIALOG: "sr-form-dialog",
   SR_DETAILS_DIALOG: "sr-details-dialog",
@@ -26,4 +26,3 @@ export const swimlaneNames = {
   Rejected: "Rejected",
   Accepted : "Accepted"
 }
-

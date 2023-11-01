@@ -260,8 +260,8 @@ class DashboardScreen extends HTMLElement {
       cancelable: true,
       detail: { message: previous },
     });
-    dipatchEventForId(idConstants.DASHBOARD_SCREEN, event1);
-    dipatchEventForId(idConstants.DASHBOARD_SCREEN, event2);
+    dipatchEventForId(idConstants.SCREEN, event1);
+    dipatchEventForId(idConstants.SCREEN, event2);
   }
 
   async handleNewSrCreation(event) {
@@ -276,7 +276,7 @@ class DashboardScreen extends HTMLElement {
         })
       );
       dipatchEventForId(
-        idConstants.DASHBOARD_SCREEN,
+        idConstants.SCREEN,
         new CustomEvent(customEvents.GET_DATA_FOR_SWIMLANE, {
           bubbles: true,
           cancelable: true,

@@ -357,29 +357,10 @@ func insertNgrams(c *fiber.Ctx,session *gocql.Session,word string) error{
 func GlobalSearch(c *fiber.Ctx, session *gocql.Session) error {
 	project := c.Params("project")
 	term := c.Params("term")
-	var sr_no []string
-	query := session.Query("select sr_no from invertedindex where term = ? Allow filtering ", term)
-	var returnData []retrieveSRData
-	err := query.Scan(&sr_no)
-	if err != nil {
-		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{"data": returnData})
-	}
-	for _, value := range sr_no {
-		var no int64
-		var description string
-		var Type string
-		var status string
-		var assignee string
-		var priority string
-		var title string
-		query = session.Query("select no,description,type,status,assignee,priority,title from servicerequest where project_name = ? and no = ?", project, value)
-		err := query.Scan(&no, &description, &Type, &status, &assignee, &priority, &title)
-		if err != nil {
-			return c.Status(fiber.StatusNotFound).JSON(fiber.Map{"data": returnData})
-		}
-		data := retrieveSRData{No: no, Description:strings.Split(description, " "),Type: Type,Status: status, Assignee: assignee, Priority: priority, Title: title}
-		returnData = append(returnData, data)
-	}
-	return c.Status(fiber.StatusOK).JSON(fiber.Map{"data": returnData})
-
+	fmt.Println(project);
+	fmt.Println(term);
+	var parent_words []string;
+	query := session.Query("select parent_word from n_grams where n_gram = ?",term);
+	query.Scan(&parent_words);
+	return c.Status(fiber.StatusOK).JSON(fiber.Map{"data":parent_words});
 }

@@ -30,7 +30,7 @@ func createWordMap(text string) map[string]string {
 	words := strings.Fields(text)
 	for _, text := range words {
 		for n := 3; n <= len(text); n++ {
-			for i := 0; i <= len(text)-n; i++ {
+			for i := 0; i <= len(text)-n-1; i++ {
 				ngram := text[i : i+n]
 				wordMap[ngram] = ngram
 			}
