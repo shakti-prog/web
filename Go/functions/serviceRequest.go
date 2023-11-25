@@ -36,13 +36,13 @@ func CreateNewSr(c *fiber.Ctx, session *gocql.Session) error {
 	if err := query.Exec(); err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"Err": "Could not create SR"})
 	}
-	for _,word := range(strings.Fields(p.Description)){
-		insertInInvertedIndex(c,session,word,int64(srNo)+1);
+	for _, word := range strings.Fields(p.Description) {
+		insertInInvertedIndex(c, session, word, int64(srNo)+1)
 	}
-	for _,word := range(strings.Fields(p.Title)){
-		insertInInvertedIndex(c,session,word,int64(srNo)+1);
+	for _, word := range strings.Fields(p.Title) {
+		insertInInvertedIndex(c, session, word, int64(srNo)+1)
 	}
-	
+
 	return c.Status(fiber.StatusOK).JSON(fiber.Map{"Message": "SR Successfully created"})
 
 }
@@ -303,64 +303,101 @@ func GetAllWorkSpaces(c *fiber.Ctx, session *gocql.Session) error {
 
 }
 
-func insertInInvertedIndex(c *fiber.Ctx, session *gocql.Session,word string, id int64) error {
-	    var exists string;
-		query := session.Query("select term from invertedindex where term = ?", word)
-		query.Scan(&exists)
-		insertValue := "{" + strconv.FormatInt(id, 10) + "}"
-		if exists == "" {
-			err := session.Query("insert into invertedindex(term,sr_no) values(?,"+insertValue+")", word).Exec()
-			if err != nil {
-				return err
-			}
-			err = insertNgrams(c,session,word)
-			if err != nil{
-				return err;
-			}
-		} else {
-			err := session.Query("update invertedindex set sr_no = sr_no + "+insertValue+" where term = ?", word).Exec()
-			if err != nil {
-				return err
-			}
-		}	
+func insertInInvertedIndex(c *fiber.Ctx, session *gocql.Session, word string, id int64) error {
+	var exists string
+	query := session.Query("select term from invertedindex where term = ?", word)
+	query.Scan(&exists)
+	insertValue := "{" + strconv.FormatInt(id, 10) + "}"
+	if exists == "" {
+		err := session.Query("insert into invertedindex(term,sr_no) values(?,"+insertValue+")", word).Exec()
+		if err != nil {
+			return err
+		}
+		err = insertNgrams(c, session, word)
+		if err != nil {
+			return err
+		}
+	} else {
+		err := session.Query("update invertedindex set sr_no = sr_no + "+insertValue+" where term = ?", word).Exec()
+		if err != nil {
+			return err
+		}
+	}
 	return nil
 }
 
-
-func insertNgrams(c *fiber.Ctx,session *gocql.Session,word string) error{
-	wordMap := createWordMap(word);
-	for key,_ := range(wordMap){
-		var exists string;
-		insertValue := "{'" +word+ "'}";
-		query := session.Query("select n_gram from n_grams where n_gram = ?", key);
-		query.Scan(&exists);
-		if exists == ""{
+func insertNgrams(c *fiber.Ctx, session *gocql.Session, word string) error {
+	wordMap := createWordMap(word)
+	for key, _ := range wordMap {
+		var exists string
+		insertValue := "{'" + word + "'}"
+		query := session.Query("select n_gram from n_grams where n_gram = ?", key)
+		query.Scan(&exists)
+		if exists == "" {
 			err := session.Query("insert into n_grams(n_gram,parent_word) values(?,"+insertValue+")", key).Exec()
 			if err != nil {
 				return err
 			}
-		} else{
+		} else {
 			err := session.Query("update n_grams set parent_word = parent_word + "+insertValue+" where n_gram = ?", key).Exec()
 			if err != nil {
 				return err
 			}
 		}
 	}
-	return nil;
+	return nil
 }
-
-
-
-
-
 
 func GlobalSearch(c *fiber.Ctx, session *gocql.Session) error {
 	project := c.Params("project")
 	term := c.Params("term")
-	fmt.Println(project);
-	fmt.Println(term);
-	var parent_words []string;
-	query := session.Query("select parent_word from n_grams where n_gram = ?",term);
-	query.Scan(&parent_words);
-	return c.Status(fiber.StatusOK).JSON(fiber.Map{"data":parent_words});
+	var parent_words []string
+	var sr_no []int64
+	query := session.Query("select parent_word from n_grams where n_gram = ?", term)
+	query.Scan(&parent_words)
+	if len(parent_words) == 0 {
+		fmt.Println("N grams not found")
+		query = session.Query("select sr_no from invertedindex where term = ?", term)
+		query.Scan(&sr_no)
+		return c.Status(fiber.StatusOK).JSON(fiber.Map{"data": sr_no})
+
+	}
+	queryString := "("
+	for i, value := range parent_words {
+		queryString += "'" + value + "'"
+		if i != len(parent_words)-1 {
+			queryString += ","
+		}
+	}
+	queryString += ")"
+	query = session.Query("select sr_no from invertedindex where term in " + queryString + " allow filtering")
+	query.Scan(&sr_no)
+	queryString = "("
+	for i, value := range sr_no {
+		queryString += strconv.FormatInt(value, 10)
+		if i != len(parent_words)-1 {
+			queryString += ","
+		}
+	}
+	queryString += ")"
+
+	var data []retrieveSRData
+	query = session.Query("select  no,description,Type,status,assignee,title,priority,createdAt,updatedAt from servicerequest where no in " + queryString + " and  project_name = ?  allow filtering",project)
+	iter := query.Iter()
+	var no int64
+	var description string
+	var Type string
+	var status string
+	var assignee string
+	var priority string
+	var title string
+	var createdAt time.Time
+	var updatedAt time.Time
+	for iter.Scan(&no, &description, &Type, &status, &assignee, &priority, &title, &createdAt, &updatedAt) {
+		srdata := retrieveSRData{No: no, Description: strings.Split(description, " "), Type: Type, Status: status, Assignee: assignee, Priority: priority, Title: title, CreatedAt: createdAt, UpdatedAt: updatedAt}
+		data = append(data, srdata)
+
+	}
+
+	return c.Status(fiber.StatusOK).JSON(fiber.Map{"data": data})
 }
